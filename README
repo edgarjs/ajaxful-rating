@@ -1,0 +1,117 @@
+=Sinopsis
+AjaxfulRating generates a rating system with a useful helper to allow you
+display and submit rates for a model 'ajaxly'.
+
+
+=Repository
+    http://svn.mimbles.net/rails/plugins/ajaxful_rating
+
+
+=Home
+    http://mimbles.net
+
+
+=Preparing the plugin
+You need a rater model (the one who rates a model), commonly a User class.
+You need to DON'T have a model called +Rate+ yet, this will be generated.
+
+Use the generator to copy the necesary files to your application:
+
+    ./script/generate ajaxful_rating
+
+Now call this method on the model you want to rate:
+
+    class Article < ActiveRecord::Base
+      has_ajaxful_rates
+    end
+
+And this one on the model you want to be the rater:
+
+    class User < ActiveRecord::Base
+      is_ajaxful_rater
+    end
+
+Finally migrate the DB <tt>rake db:migrate</tt>
+
+*Recommended* (but not necesary)
+Create a route to submit a rate:
+
+    map.resources :articles, :member => {:rate => :post}
+
+
+=Usage
+Now you are ready, supose we want our user to be able to rate an article only
+once:
+
+    # show.html.erb
+    <%= ajaxful_rating_for @article, rate_article_path(@article),
+    :enable_rate => (logged_in? && !@article.rated_by?(current_user)), :method => :post %>
+
+    # articles_controller.rb
+    def rate
+      @article = Article.find(params[:id])
+      @article.rate(params[:stars], current_user)
+      # some page update here ...
+    end
+
+As you can see, it will output 5 stars by default. To change this value, write a class method +stars+
+in your rateable model.
+
+    class Article < ActiveRecord::Base
+      has_ajaxful_rates
+
+      def self.stars
+	10
+      end
+    end
+
+And that's all. You have some helpful class and instance methods as well.
+See the documentation for details.
+
+Oh!, and don't forget to include javascripts and stylesheet:
+
+    <%= stylesheet_link_tag 'ajaxful_rating' %>
+    <%= javascript_include_tag :defaults %>
+
+I know it's not all beautiful stars, I'm not a CSS guru so you may want to
+customize your output. This style was tested on IE7 and Firefox 2.
+
+
+====Caching the rating average
+If you want to cache the rating average for your model, just add a column called
++rating_average+ as decimal with default => nil:
+
+    class CreateArticles < ActiveRecord::Migration
+      def self.up
+	create_table :articles do |t|
+	  # some other columns...
+	  t.decimal :rating_average, :precision => 3, :scale => 1, :default => nil
+	end
+
+	# self.down...
+    end
+
+To change the name of the cached column use
+
+    class Article < ActiveRecord::Base
+      has_ajaxful_rates
+
+      set_cached_average_column :my_cached_rating
+    end
+
+
+=Documentation
+http://docs.mimbles.net/projects/ajaxful_rating
+
+
+=Notes
+The plugin needs to be tested a while, so feedback is really welcome.
+
+Yes, that means it doesn't have tests yet.
+
+
+=Credits
+* _Version_: 1.0.0
+* _Author_: Edgar J. Suarez Heredia - http://mimbles.net
+* _Feedback_: mailto:edgar.js@gmail.com
+* _License_: MIT (Rails)

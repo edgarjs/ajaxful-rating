@@ -1,0 +1,25 @@
+/* 
+ * I'm not a CSS guru so... you may want to customize the style for your view.
+ * This one has been tested on IE7 and Firefox 2
+ *
+ * Don't forget to include this on your layout.
+ * <%= stylesheet_link_tag 'ajaxful_rating' %>
+*/
+
+ul.ajaxful-rating {
+    list-style: none;
+    margin: 10px 0;
+}
+
+ul.ajaxful-rating li.star {
+    float: left;
+    width: 25px;
+    hegiht: 25px;
+}
+
+ul.ajaxful-rating li.clearer { clear: both; }
+ul.ajaxful-rating li a { text-decoration: none; }
+ul.ajaxful-rating li a img { border: none; }
+ul.ajaxful-rating li.on { background: url(/images/ajaxful_rating/star_on.gif) top center no-repeat; }
+ul.ajaxful-rating li.off { background: url(/images/ajaxful_rating/star_off.gif) top center no-repeat; }
+ul.rateable li.star:hover { background: url(/images/ajaxful_rating/star_hover.gif) top center no-repeat; }
