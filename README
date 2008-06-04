@@ -1,17 +1,17 @@
-=Sinopsis
+==Sinopsis
 AjaxfulRating generates a rating system with a useful helper to allow you
 display and submit rates for a model 'ajaxly'.
 
 
-=Repository
-    http://svn.mimbles.net/rails/plugins/ajaxful_rating
+==Repository
+    git://github.com/edgarjs/ajaxful-rating.git
 
 
-=Home
+==Home
     http://mimbles.net
 
 
-=Preparing the plugin
+==Preparing the plugin
 You need a rater model (the one who rates a model), commonly a User class.
 You need to DON'T have a model called +Rate+ yet, this will be generated.
 
@@ -39,7 +39,7 @@ Create a route to submit a rate:
     map.resources :articles, :member => {:rate => :post}
 
 
-=Usage
+==Usage
 Now you are ready, supose we want our user to be able to rate an article only
 once:
 
@@ -100,11 +100,7 @@ To change the name of the cached column use
     end
 
 
-=Documentation
-http://docs.mimbles.net/projects/ajaxful_rating
-
-
-=Notes
+==Notes
 The plugin needs to be tested a while, so feedback is really welcome.
 
 Yes, that means it doesn't have tests yet.
