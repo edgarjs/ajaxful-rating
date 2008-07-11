@@ -1,100 +1,98 @@
-=Ajaxful Rating
-
-==Description
+== Description
 Provides a simple way to add rating functionality to your application.
 
 
-==Repository
+== Repository
 http://github.com/edgarjs/ajaxful-rating/
 
 
-==Getting started
+== Getting started
 The plugin comes with its own generator to make your life easier. Just:
 
-	./script/generate ajaxful_rating <rate_model> <user_model>
+  ./script/generate ajaxful_rating <rate_model> <user_model>
 	
 This will create a rate model and will link it with your +user_model+.
 Also this generator copies the necesary images, styles, etc.
 
 Example:
-	./script/generate ajaxful_rating Rate User
+  ./script/generate ajaxful_rating Rate User
 
 And don't forget to add javascripts and styles to your layout/views:
 
-	<%= javascript_include_tag :all %>
-	<%= stylesheet_link_tag :all %>
+  <%= javascript_include_tag :all %>
+  <%= stylesheet_link_tag :all %>
 
-==Making a model rateable
+== Making a model rateable
 To let a model be rateable just add +has_ratings+. There are some options for
 this call, check the rdoc for details.
 
-    class Article < ActiveRecord::Base
-      has_ratings :stars => 10
-    end
+  class Article < ActiveRecord::Base
+    has_ratings :stars => 10
+  end
 
 The generator will add a call +submits_ratings+ in the user model. And you can
 customize the behavior by passing some options (check the rdoc for details):
 
-    class User < ActiveRecord::Base
-      submits_ratings :once => true
-    end
+  class User < ActiveRecord::Base
+    submits_ratings :once => true
+  end
 
 Finally, as a mere recomendation to make it even easier, modify your routes to
 map a rate action:
 
-    map.resources :articles, :member => {:rate => :post}
+  map.resources :articles, :member => {:rate => :post}
 
 
-==Submitting/showing ratings
+== Submitting/showing ratings
 Ok so to add the stars thingie you need to call the method +ratings_for+ with two
 parameters: the ratebale model object and a user object, this last one is optional
 so if you pass !true it will only display the _static_ stars.
 		
-		# show.html.erb
-		<%= ratings_for @article, current_user %>
+  # show.html.erb
+  <%= ratings_for @article, current_user %>
 		
 There's a condition here, if you didn't add the route +rate+ to your resource 
 (as shown above) or you named it different, you'll need to pass the url to your
 action in your controller:
 
-		<%= ratings_for @article, current_user, :url => your_rate_path(@article) %>
+  <%= ratings_for @article, current_user, :url => your_rate_path(@article) %>
 		
 When a user submits a rating it will call the action in your controller, for
 example (if you added the +rate+ route):
 
-    # articles_controller.rb
-    # POST /articles/rate/1
-    def rate
-      @article = Article.find(params[:id])
-      @article.rate(params[:rating])
-      # some page update here ...
-    end
+  # articles_controller.rb
+  # POST /articles/rate/1
+  def rate
+    @article = Article.find(params[:id])
+    @article.rate(params[:rating])
+    # some page update here ...
+  end
 		
 There are some more options for this helper, see the rdoc for details.
 
 
-==Caching the rating average
+== Caching the rating average
 To cache the model's rating average add a column named +rating_average+ to your
 model table:
 
-    class AddRatingAverageToArticles < ActiveRecord::Migration
-      def self.up
-				add_column :articles, :rating_average, :decimal, :default => nil
-			end
-			
-			def self.down
-				remove_column :articles, :rating_average
-			end
+  class AddRatingAverageToArticles < ActiveRecord::Migration
+    def self.up
+    add_column :articles, :rating_average, :decimal, :default => nil
+  end
+
+  def self.down
+    remove_column :articles, :rating_average
     end
+  end
 
 If you want to customize the name of the cache column:
 
-    class Article < ActiveRecord::Base
-      has_ratings, :cache_column => 'my_cached_rating'
-    end
+  class Article < ActiveRecord::Base
+    has_ratings, :cache_column => 'my_cached_rating'
+  end
 
 
-==Gotchas
+== Gotchas
 The plugin is inteded to be simple, but it depends on some methods from the
 restful_authentication plugin. Although you can use your own authentication
 system, you will need to pass some _extra_ parameters and so on... read the rdoc
@@ -106,30 +104,30 @@ compatibility and it's been developed from scratch using the rails 2.1 API. But
 you are able to get the first version of the plugin, just checkout the branch
 <em>1.0</em> from the repository.
 
-==Notes
+== Notes
 Thanks to all of you for your feedback and bug reports. This new version of the
 plugin is possible by you.
 Also specially thanks to Banit Chen for the "allow users to change their submit"
 feature.
 
-==License
-Copyright (c) 2008 Edgar J. Suarez
+== License
+  Copyright (c) 2008 Edgar J. Suarez
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
