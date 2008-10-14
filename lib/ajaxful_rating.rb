@@ -1,5 +1,6 @@
 module AjaxfulRating # :nodoc:
   class DependencyError < StandardError; end
+  class BadOptionsError < StandardError; end
   
   def self.included(base)
     base.extend ClassMethods
@@ -14,17 +15,16 @@ module AjaxfulRating # :nodoc:
     # * <tt>:once</tt> Set to true if the model can be rated multiple times by the same user.
     # It will *update* the user previous rating, not create a new one.
     # * <tt>:cache_column</tt> Name of the column for storing the cached rating average.
+    # * <tt>:logged_in_user_instance</tt> Name of the instance for the current logged in user.
     # 
     # Example:
     #   class Article < ActiveRecord::Base
     #     ajaxful_rateable :stars => 10, :cache_column => :custom_column
     #   end
     def ajaxful_rateable(options = {})
-      raise DependencyError, "Missing current_user method" unless method_defined?(:current_user)
-      
       has_many :rates, :as => :rateable, :dependent => :destroy
       
-      self.options.udpate(options)
+      self.options.merge!(options)
       include AjaxfulRating::InstanceMethods
       extend AjaxfulRating::SingletonMethods
     end
@@ -34,8 +34,18 @@ module AjaxfulRating # :nodoc:
       has_many :rates, options
     end
     
-    private
+    # Maximum value accepted when rating the model. Default is 5.
+    # 
+    # Change it by passing the :stars option to +ajaxful_rateable+
+    # 
+    #   ajaxful_rateable :stars => 10
+    def max_rate_value
+      options[:stars]
+    end
     
+    protected
+    
+    # Default options for rating.
     def options
       {
         :stars => 5,
@@ -58,14 +68,19 @@ module AjaxfulRating # :nodoc:
     #     @article.rate(params[:rating])
     #     # some page update here ...
     #   end
-    def rate(stars, user)
-      return false if stars.to_i > self.class.options[:stars]
+    def rate(options = {})
+      raise BadOptionsError, "#{options} is not a valid hash of options." unless options.include?(:stars)
+      return false if (stars = options[:stars].to_i) > self.class.max_rate_value
+      user = options[:user] || send(self.class.options[:logged_in_user_instance])
 
-      rate = Rate.new(:rate => stars)
-      rate.rateable_type = self.class.name
-      if (rates << rate) && (user.rates << rate)
-        self.update_cached_average
+      rate = rates.build(:stars => stars)
+      if user.respond_to?(:rates)
+        user.rates << rate
+      else
+        rate.user_id = user.id
+        rate.save!
       end
+      self.update_cached_average
     end
 
     # Returns an array with all users that have rated this object.
@@ -92,7 +107,7 @@ module AjaxfulRating # :nodoc:
     # Rating average for the object.
     def rate_average(cached = true)
       avg = if cached && self.class.caching_average?
-        self[self.class.cached_average_column]
+        self[self.class.options[:cache_column]]
       else
         self.rates_sum.to_f / self.total_rates.to_f
       end.to_f
@@ -102,7 +117,7 @@ module AjaxfulRating # :nodoc:
     # Updates the cached average column in the rateable model.
     def update_cached_average
       if self.class.caching_average?
-        self.update_attribute(self.class.cached_average_column, self.rate_average(false))
+        self.update_attribute(self.class.options[:cache_column], self.rate_average(false))
       end
     end
   end
@@ -144,13 +159,16 @@ module AjaxfulRating # :nodoc:
     # Indicates if the rateable model is able to cache the rate average.
     #
     # Include a column named +rating_average+ in your rateable model with
-    # default null and as decimal:
+    # default null, as decimal:
     #
     #   t.decimal :rating_average, :precision => 3, :scale => 1, :default => nil
     #
-    # To customize the name of the column see Mimbles::AjaxfulRating::ClassMethods.set_cached_average_column
+    # To customize the name of the column specify the option <tt>:cache_column</tt> to ajaxful_rateable
+    # 
+    #   ajaxful_rateable :cache_column => :my_custom_column
+    #
     def caching_average?
-      column_names.include?(cached_average_column)
+      column_names.include?(options[:cache_column])
     end
   end
 end
