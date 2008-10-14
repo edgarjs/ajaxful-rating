@@ -1,6 +1,5 @@
 module AjaxfulRating # :nodoc:
   class DependencyError < StandardError; end
-  class BadOptionsError < StandardError; end
   
   def self.included(base)
     base.extend ClassMethods
@@ -43,15 +42,12 @@ module AjaxfulRating # :nodoc:
       options[:stars]
     end
     
-    protected
-    
     # Default options for rating.
     def options
       {
         :stars => 5,
         :once => false,
-        :cache_column => :rating_average,
-        :logged_in_user_instance => :current_user
+        :cache_column => :rating_average
       }
     end
   end
@@ -65,13 +61,11 @@ module AjaxfulRating # :nodoc:
     #   # Articles Controller
     #   def rate
     #     @article = Article.find(params[:id])
-    #     @article.rate(params[:rating])
+    #     @article.rate(params[:stars], current_user)
     #     # some page update here ...
     #   end
-    def rate(options = {})
-      raise BadOptionsError, "#{options} is not a valid hash of options." unless options.include?(:stars)
-      return false if (stars = options[:stars].to_i) > self.class.max_rate_value
-      user = options[:user] || send(self.class.options[:logged_in_user_instance])
+    def rate(stars, user)
+      return false if stars > self.class.max_rate_value
 
       rate = rates.build(:stars => stars)
       if user.respond_to?(:rates)
@@ -101,7 +95,7 @@ module AjaxfulRating # :nodoc:
 
     # Total sum of the rates.
     def rates_sum
-      rates.sum(:rate)
+      rates.sum(:stars)
     end
 
     # Rating average for the object.
@@ -124,7 +118,6 @@ module AjaxfulRating # :nodoc:
 
   # Class methods for the rateable model.
   module SingletonMethods
-    define_method(:stars) { 5 } unless respond_to?(:stars)
 
     # Finds all rateable objects rated by the +user+.
     def find_rated_by(user)
@@ -133,7 +126,7 @@ module AjaxfulRating # :nodoc:
 
     # Finds all rateable objects rated with +stars+.
     def find_rated_with(stars)
-      find_statement(:rate, stars)
+      find_statement(:stars, stars)
     end
 
     # Finds the rateable object with the highest rate average.
