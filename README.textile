@@ -1,0 +1,144 @@
+h1. Ajaxful Rating
+
+Provides a simple way to add rating functionality to your application.
+
+h2. Repository
+
+Find it at "github.com/edgarjs/ajaxful-rating":http://github.com/edgarjs/ajaxful-rating
+
+*******************************************************************
+
+h2. Instructions
+
+*Pre-notes*
+
+The plugin is inteded to be simple, but it depends on some methods from the
+"restful_authentication":http://github.com/technoweenie/restful-authentication plugin.
+Although you can use your own authentication system, you will need to pass some _extra_ 
+parameters and so on... please read the rdoc for a complete understanding of the plugin.
+
+h3. Install
+
+To install the plugin:
+  script/plugin install git://github.com/edgarjs/ajaxful-rating.git
+
+h3. Generate
+
+  script/generate ajaxful_rating UserModelName
+	
+The generator takes one argument: UserModelName, which is the name of your *current*
+user model. This is necessary to link both the rate and user models.
+
+Also this generator copies the necesary images, styles, etc.
+
+Example:
+  # I suppose you have generated already an authenticated model.
+  script/generate authenticated user sessions
+  
+  script/generate ajaxful_rating user
+
+So this call will create a Rate model and will link it to your User model.
+
+h3. Prepare
+
+To let a model be rateable just add @has_ratings@. There are some options for
+this call, check the rdoc for details.
+
+  <pre><code>
+  class Article < ActiveRecord::Base
+    has_ratings :stars => 10
+  end
+  </code></pre>
+
+Then you need to add a call @submits_ratings@ in the user model. And you can
+customise the behavior by passing some options:
+
+  <pre><code>
+  class User < ActiveRecord::Base
+    submits_ratings :once => true
+  end
+  </code></pre>
+
+Don't forget to include necessary javascripts and stylesheets:
+
+  <pre><code>
+  <%= javascript_include_tag :all %>
+  <%= stylesheet_link_tag :all %>
+  </code></pre>
+
+Finally, as a mere recomendation to make it even easier, modify your routes to
+map a rate action:
+
+  map.resources :articles, :member => {:rate => :post}
+
+h3. Use it
+Ok so to add the stars line you need to call the helper method @ratings_for@ with two
+parameters: the ratebale model object and a user object, this last one is optional
+so if you don't pass it the helper will only display the _static_ stars.
+
+  <pre><code>
+  # show.html.erb
+  <%= ratings_for @article, current_user %>
+  </code></pre>
+		
+There's a condition here, if you didn't add the route @rate@ to your resource 
+(as shown above) or you named it different, you'll need to pass the url to the
+correct action in your controller:
+
+  <pre><code>
+  <%= ratings_for @article, current_user, :url => your_rate_path(@article) %>
+  </code></pre>
+		
+When a user submits a rating it will call the action in your controller, for
+example (if you added the @rate@ route):
+
+  <pre><code>
+  def rate
+    @article = Article.find(params[:id])
+    @article.rate(params[:rating])
+    # some page update here ...
+  end
+  </code></pre>
+
+There are some more options for this helper, please see the rdoc for details.
+
+h3. Cache
+
+To cache the model's rating average add a column named @rating_average@ to your
+model table:
+
+  <pre><code>
+  class AddRatingAverageToArticles < ActiveRecord::Migration
+    def self.up
+      add_column :articles, :rating_average, :decimal, :default => nil
+    end
+  
+    def self.down
+      remove_column :articles, :rating_average
+    end
+  end
+  </code></pre>
+
+If you want to customise the name of the cache column:
+
+  <pre><code>
+  class Article < ActiveRecord::Base
+    has_ratings, :cache_column => 'my_cached_rating'
+  end
+  </code></pre>
+
+h2. About backwards compatibility
+
+I decided to jump directly to version 2.0 because there is a lot (and it means
+A LOT!) of changes and new features. You can always checkout the version 1.0 from
+the repository though.
+
+h2. Feedback
+
+I'll really appreciate your feedback, please contact me at edgar.js[at]gmail.com
+
+h2. License
+
+This code is released under Creative Commons Attribution-Share Alike 3.0 license.
+
+!http://i.creativecommons.org/l/by-sa/3.0/88x31.png!:http://creativecommons.org/licenses/by-sa/3.0/
