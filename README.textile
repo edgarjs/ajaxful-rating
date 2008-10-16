@@ -25,6 +25,7 @@ user model. This is necessary to link both the rate and user models.
 Also this generator copies the necesary images, styles, etc.
 
 Example:
+
   # I suppose you have generated already an authenticated model.
   script/generate authenticated user sessions
   
@@ -119,7 +120,7 @@ If you want to customise the name of the cache column just pass it in the option
 
   <pre><code>
   class Article < ActiveRecord::Base
-    ajaxful_rateable, :cache_column => :my_cached_rating
+    ajaxful_rateable :cache_column => :my_cached_rating
   end
   </code></pre>
 
