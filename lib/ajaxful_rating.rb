@@ -1,20 +1,23 @@
 module AjaxfulRating # :nodoc:
-  class DependencyError < StandardError; end
+  class AlreadyRatedError < StandardError
+    def to_s
+      "Model has already been rated by this user. To allow update of ratings pass :allow_update => true to the ajaxful_rateable call."
+    end
+  end
   
   def self.included(base)
     base.extend ClassMethods
   end
 
   module ClassMethods
+    mattr_reader :options
 
     # Extends the model to be easy ajaxly rateable.
     #
     # Options:
     # * <tt>:stars</tt> Max number of stars that can be submitted.
-    # * <tt>:once</tt> Set to true if the model can be rated multiple times by the same user.
-    # It will *update* the user previous rating, not create a new one.
+    # * <tt>:allow_update</tt> Set to true if you want users to be able to update their votes.
     # * <tt>:cache_column</tt> Name of the column for storing the cached rating average.
-    # * <tt>:logged_in_user_instance</tt> Name of the instance for the current logged in user.
     # 
     # Example:
     #   class Article < ActiveRecord::Base
@@ -23,7 +26,7 @@ module AjaxfulRating # :nodoc:
     def ajaxful_rateable(options = {})
       has_many :rates, :as => :rateable, :dependent => :destroy
       
-      self.options.merge!(options)
+      @@options = options.reverse_merge(:stars => 5, :allow_update => true, :cache_column => :rating_average)
       include AjaxfulRating::InstanceMethods
       extend AjaxfulRating::SingletonMethods
     end
@@ -41,15 +44,6 @@ module AjaxfulRating # :nodoc:
     def max_rate_value
       options[:stars]
     end
-    
-    # Default options for rating.
-    def options
-      {
-        :stars => 5,
-        :once => false,
-        :cache_column => :rating_average
-      }
-    end
   end
 
   # Instance methods for the rateable object.
@@ -65,30 +59,37 @@ module AjaxfulRating # :nodoc:
     #     # some page update here ...
     #   end
     def rate(stars, user)
-      return false if stars > self.class.max_rate_value
-
-      rate = rates.build(:stars => stars)
+      return false if (stars > self.class.max_rate_value)
+      raise AlreadyRatedError if (!self.class.options[:allow_update] && rated_by?(user))
+      
+      rate = (self.class.options[:allow_update] && rated_by?(user)) ? rate_by(user) : rates.build
+      rate.stars = stars
       if user.respond_to?(:rates)
         user.rates << rate
       else
-        rate.user_id = user.id
-        rate.save!
-      end
-      self.update_cached_average
+        rate.send "#{self.class.user_class_name}_id=", user.id
+      end if rate.new_record?
+      rate.save! unless self.update_cached_average
     end
 
     # Returns an array with all users that have rated this object.
-    def rated_by
-      User.find_by_sql(["SELECT u.* FROM users u INNER JOIN rates r ON u.[id] = r.[user_id] " +
-            "WHERE r.[rateable_id] = ? AND r.[rateable_type] = ?", id, self.class.name]).uniq
+    def raters
+      User.find_by_sql(["SELECT DISTINCT u.* FROM #{self.class.user_class_name.pluralize} u INNER JOIN rates r ON " +
+            "u.[id] = r.[#{self.class.user_class_name}_id] " +
+            "WHERE r.[rateable_id] = ? AND r.[rateable_type] = ?", id, self.class.name])
+    end
+    
+    # Finds the rate made by the user if he/she has already voted.
+    def rate_by(user)
+      rates.send "find_by_#{self.class.user_class_name}_id", user
     end
 
     # Return true if the user has rated the object, otherwise false
     def rated_by?(user)
-      !rates.find_by_user_id(user).nil?
+      !rate_by(user).nil?
     end
 
-    # Object's total rates.
+    # Instance's total rates.
     def total_rates
       rates.size
     end
@@ -99,25 +100,32 @@ module AjaxfulRating # :nodoc:
     end
 
     # Rating average for the object.
+    #
+    # Pass false as param to force the calculation if you are caching it.
     def rate_average(cached = true)
       avg = if cached && self.class.caching_average?
-        self[self.class.options[:cache_column]]
+        send(self.class.options[:cache_column])
       else
         self.rates_sum.to_f / self.total_rates.to_f
-      end.to_f
+      end
       avg.nan? ? 0.0 : avg
     end
 
     # Updates the cached average column in the rateable model.
     def update_cached_average
-      if self.class.caching_average?
-        self.update_attribute(self.class.options[:cache_column], self.rate_average(false))
-      end
+      self.update_attribute(self.class.options[:cache_column], self.rate_average(false)) if self.class.caching_average?
     end
   end
 
-  # Class methods for the rateable model.
   module SingletonMethods
+    
+    # Name of the class for the user model.
+    def user_class_name
+      @@user_class_name ||= Rate.column_names.find do |c|
+        u = c.scan(/(\w+)_id$/).flatten.first
+        break u if u && u != 'rateable'
+      end
+    end
 
     # Finds all rateable objects rated by the +user+.
     def find_rated_by(user)

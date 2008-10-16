@@ -10,13 +10,6 @@ Find it at "github.com/edgarjs/ajaxful-rating":http://github.com/edgarjs/ajaxful
 
 h2. Instructions
 
-*Pre-notes*
-
-The plugin is inteded to be simple, but it depends on some methods from the
-"restful_authentication":http://github.com/technoweenie/restful-authentication plugin.
-Although you can use your own authentication system, you will need to pass some _extra_ 
-parameters and so on... please read the rdoc for a complete understanding of the plugin.
-
 h3. Install
 
 To install the plugin:
@@ -41,21 +34,24 @@ So this call will create a Rate model and will link it to your User model.
 
 h3. Prepare
 
-To let a model be rateable just add @has_ratings@. There are some options for
-this call, check the rdoc for details.
+To let a model be rateable just add @ajaxful_rateable@. You can pass a hash of options to
+customise this call:
+* @:stars@ Max number of stars that can be submitted.
+* @:allow_update@ Set to true if you want users to be able to update their votes.
+* @:cache_column@ Name of the column for storing the cached rating average.
 
   <pre><code>
   class Article < ActiveRecord::Base
-    has_ratings :stars => 10
+    ajaxful_rateable :stars => 10
   end
   </code></pre>
 
-Then you need to add a call @submits_ratings@ in the user model. And you can
-customise the behavior by passing some options:
+Then you need to add a call @ajaxful_rater@ in the user model. This includes a simple line so
+you can add it _by your own_ as well (@has_many :rates@).
 
   <pre><code>
   class User < ActiveRecord::Base
-    submits_ratings :once => true
+    ajaxful_rater
   end
   </code></pre>
 
@@ -72,6 +68,7 @@ map a rate action:
   map.resources :articles, :member => {:rate => :post}
 
 h3. Use it
+
 Ok so to add the stars line you need to call the helper method @ratings_for@ with two
 parameters: the ratebale model object and a user object, this last one is optional
 so if you don't pass it the helper will only display the _static_ stars.
@@ -95,7 +92,7 @@ example (if you added the @rate@ route):
   <pre><code>
   def rate
     @article = Article.find(params[:id])
-    @article.rate(params[:rating])
+    @article.rate(params[:stars], current_user)
     # some page update here ...
   end
   </code></pre>
@@ -104,8 +101,7 @@ There are some more options for this helper, please see the rdoc for details.
 
 h3. Cache
 
-To cache the model's rating average add a column named @rating_average@ to your
-model table:
+To cache the model's rating average add a column named @rating_average@ to your model table:
 
   <pre><code>
   class AddRatingAverageToArticles < ActiveRecord::Migration
@@ -119,19 +115,18 @@ model table:
   end
   </code></pre>
 
-If you want to customise the name of the cache column:
+If you want to customise the name of the cache column just pass it in the options hash:
 
   <pre><code>
   class Article < ActiveRecord::Base
-    has_ratings, :cache_column => 'my_cached_rating'
+    ajaxful_rateable, :cache_column => :my_cached_rating
   end
   </code></pre>
 
 h2. About backwards compatibility
 
-I decided to jump directly to version 2.0 because there is a lot (and it means
-A LOT!) of changes and new features. You can always checkout the version 1.0 from
-the repository though.
+I decided to jump directly to version 2.0 because there are many important changes. You can always
+checkout the version 1.0 from the repository though.
 
 h2. Feedback
 
