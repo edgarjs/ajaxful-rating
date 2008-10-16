@@ -74,9 +74,11 @@ module AjaxfulRating # :nodoc:
 
     # Returns an array with all users that have rated this object.
     def raters
-      User.find_by_sql(["SELECT DISTINCT u.* FROM #{self.class.user_class_name.pluralize} u INNER JOIN rates r ON " +
-            "u.[id] = r.[#{self.class.user_class_name}_id] " +
-            "WHERE r.[rateable_id] = ? AND r.[rateable_type] = ?", id, self.class.name])
+      eval(self.class.user_class_name.classify).find_by_sql(
+        ["SELECT DISTINCT u.* FROM #{self.class.user_class_name.pluralize} u INNER JOIN rates r ON " +
+            "u.[id] = r.[#{self.class.user_class_name}_id] WHERE r.[rateable_id] = ? AND r.[rateable_type] = ?", 
+          id, self.class.name]
+      )
     end
     
     # Finds the rate made by the user if he/she has already voted.
