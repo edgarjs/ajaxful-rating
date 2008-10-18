@@ -70,13 +70,19 @@ map a rate action:
 
 h3. Use it
 
-Ok so to add the stars line you need to call the helper method @ratings_for@ with two
-parameters: the ratebale model object and a user object, this last one is optional
-so if you don't pass it the helper will only display the _static_ stars.
+To add the star links you need to call the helper method @ratings_for@.
+It tries to call @current_user@ method as the rater instance. If it's nil then the stars
+will not be _linkeables_.
 
   <pre><code>
   # show.html.erb
-  <%= ratings_for @article, current_user %>
+  <%= ratings_for @article %>
+  </code></pre>
+
+You can specify a custom user instance by passing it as parameter.
+
+  <pre><code>
+  <%= ratings_for @article, @user %>
   </code></pre>
 		
 There's a condition here, if you didn't add the route @rate@ to your resource 
@@ -84,7 +90,7 @@ There's a condition here, if you didn't add the route @rate@ to your resource
 correct action in your controller:
 
   <pre><code>
-  <%= ratings_for @article, current_user, :url => your_rate_path(@article) %>
+  <%= ratings_for @article, :url => your_rate_path(@article) %>
   </code></pre>
 		
 When a user submits a rating it will call the action in your controller, for
@@ -138,3 +144,7 @@ h2. License
 This code is released under Creative Commons Attribution-Share Alike 3.0 license.
 
 !http://i.creativecommons.org/l/by-sa/3.0/88x31.png!:http://creativecommons.org/licenses/by-sa/3.0/
+
+h3. Credits
+
+The helper's style was taken from http://www.komodomedia.com/blog/2007/01/css-star-rating-redux/ with author's permission.
