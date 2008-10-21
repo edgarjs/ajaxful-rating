@@ -56,13 +56,6 @@ you can add it _by your own_ as well (@has_many :rates@).
   end
   </code></pre>
 
-Don't forget to include necessary javascripts and stylesheets:
-
-  <pre><code>
-  <%= javascript_include_tag :all %>
-  <%= stylesheet_link_tag :all %>
-  </code></pre>
-
 Finally, as a mere recomendation to make it even easier, modify your routes to
 map a rate action:
 
@@ -90,7 +83,16 @@ There's a condition here, if you didn't add the route @rate@ to your resource
 correct action in your controller:
 
   <pre><code>
-  <%= ratings_for @article, :url => your_rate_path(@article) %>
+  <%= ratings_for @article, :remote_options => {:url => your_rate_path(@article)} %>
+  </code></pre>
+
+*To display the stars properly you need to add a call in the head of your layout, which will generate the
+required CSS style for the list. Also don't forget to include the javascripts.*
+
+  <pre><code>
+    # within the head tags of your layout...
+    <%= javascript_include_tag :defaults %>
+    <%= stylesheet 'ajaxful_rating' %>
   </code></pre>
 		
 When a user submits a rating it will call the action in your controller, for

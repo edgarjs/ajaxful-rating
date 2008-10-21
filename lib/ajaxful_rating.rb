@@ -63,7 +63,7 @@ module AjaxfulRating # :nodoc:
     #     # some page update here ...
     #   end
     def rate(stars, user)
-      return false if (stars > self.class.max_rate_value)
+      return false if (stars.to_i > self.class.max_rate_value)
       raise AlreadyRatedError if (!self.class.options[:allow_update] && rated_by?(user))
       
       rate = (self.class.options[:allow_update] && rated_by?(user)) ? rate_by(user) : rates.build
