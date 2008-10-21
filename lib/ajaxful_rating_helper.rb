@@ -11,16 +11,12 @@ module AjaxfulRating # :nodoc:
     # It accepts the next options:
     # * <tt>:class</tt> CSS class for the ul. Default is 'ajaxful-rating'.
     # * <tt>:link_class_prefix</tt> Prefix for the li a CSS class. Default is 'stars'.
-    # * <tt>:title_singular</tt> String format to display as img title when singular. Accepts 1 digit param,
-    # which is the total of stars. Default is "1 star out of %d".
-    # * <tt>:title_plural</tt> String format to display as img title when singular. Accepts 2 digit params,
-    # the first one is the current star and the second is the total of stars. Default is "%d stars out of %d".
-    # * <tt>:current</tt> String format to display as the current rating average. Default is "Currently %d/%d stars".
     # * <tt>:small_stars</tt> Set this param to true to display smaller images. Default is false.
     # * <tt>:small_star_class</tt> CSS class for the list when using small images. Default is 'small-stars'.
     # * <tt>:html</tt> Hash of options to customise the ul tag.
     # * <tt>:remote_options</tt> Hash of options for the link_to_remote function.
     # Default is {:method => :post, :url => rate_rateablemodel_path(rateable)}.
+    # * <tt>:wrap</tt> Whether the star list is wrapped within a div tag or not. This is useful when page updating. Default is true.
     # 
     # Example:
     #   <%= ratings_for @article %>
@@ -56,6 +52,18 @@ module AjaxfulRating # :nodoc:
     #     @article.rate(params[:stars], current_user) # or any user instance
     #     # update page, etc.
     #   end
+    # 
+    # I18n:
+    # 
+    # You can translate the title of the images (the tool tip that shows when the mouse is over) and the 'Currently x/x stars'
+    # string by setting these keys on your translation hash:
+    # 
+    #   ajaxful_rating:
+    #     stars:
+    #       current_average: "Current rating: {{average}}/{{max}}"
+    #       title:
+    #         one: 1 star out of {{total}}
+    #         other: "{{count}} stars out of {{total}}"
     def ratings_for(rateable, *args)
       user = extract_options(rateable, *args)
       ajaxful_styles << %Q(
@@ -63,13 +71,16 @@ module AjaxfulRating # :nodoc:
       .#{options[:small_star_class]} { width: #{rateable.class.max_rate_value * 10}px; }
       )
       width = (rateable.rate_average / rateable.class.max_rate_value.to_f) * 100
-      content_tag(:div, :id => "ajaxful-rating-#{rateable.class.name.downcase}-#{rateable.id}") do
-        content_tag(:ul, options[:html]) do
-          Range.new(1, rateable.class.max_rate_value).collect do |i|
-            build_star rateable, user, i
-          end.insert(0, content_tag(:li, options[:current] %[rateable.rate_average, rateable.class.max_rate_value],
-              :class => 'current-rating', :style => "width:#{width}%"))
-        end
+      ul = content_tag(:ul, options[:html]) do
+        Range.new(1, rateable.class.max_rate_value).collect do |i|
+          build_star rateable, user, i
+        end.insert(0, content_tag(:li, current_average(rateable),
+            :class => 'current-rating', :style => "width:#{width}%"))
+      end
+      if options[:wrap]
+        content_tag(:div, ul, :id => "ajaxful-rating-#{rateable.class.name.downcase}-#{rateable.id}")
+      else
+        ul
       end
     end
   
@@ -95,11 +106,10 @@ module AjaxfulRating # :nodoc:
             z-index: #{rateable.class.max_rate_value + 2 - i};
         }
       )
-      star_options = {:class => a_class, :title => pluralize_title(i, rateable.class.max_rate_value)}
       star = if user && ((rateable.rated_by?(user) && rateable.class.options[:allow_update]) || !rateable.rated_by?(user))
-        link_to_remote(i, build_remote_options(star_options, i))
+        link_to_remote(i, build_remote_options({:class => a_class, :title => pluralize_title(i, rateable.class.max_rate_value)}, i))
       else
-        content_tag(:span, i, star_options)
+        content_tag(:span, i, :class => a_class, :title => current_average(rateable))
       end
       content_tag(:li, star)
     end
@@ -107,11 +117,9 @@ module AjaxfulRating # :nodoc:
     # Default options for the helper.
     def options
       @options ||= {
+        :wrap => true,
         :class => 'ajaxful-rating',
         :link_class_prefix => :stars,
-        :title_singular => "1 star out of %d",
-        :title_plural => "%d stars out of %d",
-        :current => "Currently %d/%d stars",
         :small_stars => false,
         :small_star_class => 'small-star',
         :html => {},
@@ -121,7 +129,14 @@ module AjaxfulRating # :nodoc:
   
     # Builds the proper title for the star.
     def pluralize_title(current, max)
-      (current == 1) ? options[:title_singular] % max : options[:title_plural] % [current, max]
+      (current == 1) ? I18n.t('ajaxful_rating.stars.title.one', :max => max, :default => "1 star out of {{max}}") :
+        I18n.t('ajaxful_rating.stars.title.other', :count => current, :max => max, :default => "{{count}} stars out of {{max}}")
+    end
+    
+    # Returns the current average string.
+    def current_average(rateable)
+      I18n.t('ajaxful_rating.stars.current_average', :average => rateable.rate_average,
+        :max => rateable.class.max_rate_value, :default => "Current rating: {{average}}/{{max}}")
     end
   
     # Temporary instance to hold dynamic styles.

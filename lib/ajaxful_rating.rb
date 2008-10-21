@@ -149,12 +149,12 @@ module AjaxfulRating # :nodoc:
 
     # Finds the rateable object with the highest rate average.
     def find_most_popular
-      find(:all).sort {|r1, r2| r1.rate_average <=> r2.rate_average}.last
+      all.sort_by(&:rate_average).last
     end
 
     # Finds the rateable object with the lowest rate average.
     def find_less_popular
-      find(:all).sort {|r1, r2| r1.rate_average <=> r2.rate_average}.first
+      all.sort_by(&:rate_average).first
     end
 
     # Finds rateable objects by Rate's attribute.
