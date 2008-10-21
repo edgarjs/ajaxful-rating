@@ -4,7 +4,7 @@ module AjaxfulRating # :nodoc:
       "Model has already been rated by this user. To allow update of ratings pass :allow_update => true to the ajaxful_rateable call."
     end
   end
-  
+
   def self.included(base)
     base.extend ClassMethods
   end
@@ -18,14 +18,14 @@ module AjaxfulRating # :nodoc:
     # * <tt>:stars</tt> Max number of stars that can be submitted.
     # * <tt>:allow_update</tt> Set to true if you want users to be able to update their votes.
     # * <tt>:cache_column</tt> Name of the column for storing the cached rating average.
-    # 
+    #
     # Example:
     #   class Article < ActiveRecord::Base
     #     ajaxful_rateable :stars => 10, :cache_column => :custom_column
     #   end
     def ajaxful_rateable(options = {})
       has_many :rates, :as => :rateable, :dependent => :destroy
-      
+
       @@options = options.reverse_merge(
         :stars => 5,
         :allow_update => true,
@@ -39,11 +39,11 @@ module AjaxfulRating # :nodoc:
     def ajaxful_rater(options = {})
       has_many :rates, options
     end
-    
+
     # Maximum value accepted when rating the model. Default is 5.
-    # 
+    #
     # Change it by passing the :stars option to +ajaxful_rateable+
-    # 
+    #
     #   ajaxful_rateable :stars => 10
     def max_rate_value
       options[:stars]
@@ -54,7 +54,7 @@ module AjaxfulRating # :nodoc:
   module InstanceMethods
 
     # Submits a new rate. Accepts a hash of tipical Ajax request.
-    # 
+    #
     # Example:
     #   # Articles Controller
     #   def rate
@@ -65,7 +65,7 @@ module AjaxfulRating # :nodoc:
     def rate(stars, user)
       return false if (stars.to_i > self.class.max_rate_value)
       raise AlreadyRatedError if (!self.class.options[:allow_update] && rated_by?(user))
-      
+
       rate = (self.class.options[:allow_update] && rated_by?(user)) ? rate_by(user) : rates.build
       rate.stars = stars
       if user.respond_to?(:rates)
@@ -80,11 +80,11 @@ module AjaxfulRating # :nodoc:
     def raters
       eval(self.class.user_class_name.classify).find_by_sql(
         ["SELECT DISTINCT u.* FROM #{self.class.user_class_name.pluralize} u INNER JOIN rates r ON " +
-            "u.[id] = r.[#{self.class.user_class_name}_id] WHERE r.[rateable_id] = ? AND r.[rateable_type] = ?", 
+            "u.[id] = r.[#{self.class.user_class_name}_id] WHERE r.[rateable_id] = ? AND r.[rateable_type] = ?",
           id, self.class.name]
       )
     end
-    
+
     # Finds the rate made by the user if he/she has already voted.
     def rate_by(user)
       rates.send "find_by_#{self.class.user_class_name}_id", user
@@ -124,7 +124,7 @@ module AjaxfulRating # :nodoc:
   end
 
   module SingletonMethods
-    
+
     # Name of the class for the user model.
     def user_class_name
       @@user_class_name ||= Rate.column_names.find do |c|
@@ -171,11 +171,11 @@ module AjaxfulRating # :nodoc:
     #   t.decimal :rating_average, :precision => 3, :scale => 1, :default => nil
     #
     # To customize the name of the column specify the option <tt>:cache_column</tt> to ajaxful_rateable
-    # 
+    #
     #   ajaxful_rateable :cache_column => :my_custom_column
     #
     def caching_average?
-      column_names.include?(options[:cache_column])
+      column_names.include?(options[:cache_column].to_s)
     end
   end
 end
