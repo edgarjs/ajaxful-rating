@@ -120,7 +120,7 @@ To cache the model's rating average add a column named @rating_average@ to your 
   <pre><code>
   class AddRatingAverageToArticles < ActiveRecord::Migration
     def self.up
-      add_column :articles, :rating_average, :decimal, :default => nil
+      add_column :articles, :rating_average, :decimal, :default => 0
     end
   
     def self.down

@@ -73,7 +73,8 @@ module AjaxfulRating # :nodoc:
       else
         rate.send "#{self.class.user_class_name}_id=", user.id
       end if rate.new_record?
-      rate.save! unless self.update_cached_average
+      rate.save!
+      self.update_cached_average
     end
 
     # Returns an array with all users that have rated this object.
@@ -110,7 +111,7 @@ module AjaxfulRating # :nodoc:
     # Pass false as param to force the calculation if you are caching it.
     def rate_average(cached = true)
       avg = if cached && self.class.caching_average?
-        send(self.class.options[:cache_column])
+        send(self.class.options[:cache_column]).to_f
       else
         self.rates_sum.to_f / self.total_rates.to_f
       end
@@ -119,7 +120,10 @@ module AjaxfulRating # :nodoc:
 
     # Updates the cached average column in the rateable model.
     def update_cached_average
-      self.update_attribute(self.class.options[:cache_column], self.rate_average(false)) if self.class.caching_average?
+      if self.class.caching_average?
+        send("#{self.class.options[:cache_column]}=", self.rate_average(false))
+        save!
+      end
     end
   end
 
@@ -168,7 +172,7 @@ module AjaxfulRating # :nodoc:
     # Include a column named +rating_average+ in your rateable model with
     # default null, as decimal:
     #
-    #   t.decimal :rating_average, :precision => 3, :scale => 1, :default => nil
+    #   t.decimal :rating_average, :precision => 3, :scale => 1, :default => 0
     #
     # To customize the name of the column specify the option <tt>:cache_column</tt> to ajaxful_rateable
     #
