@@ -26,7 +26,11 @@ module AjaxfulRating # :nodoc:
     def ajaxful_rateable(options = {})
       has_many :rates, :as => :rateable, :dependent => :destroy
       
-      @@options = options.reverse_merge(:stars => 5, :allow_update => true, :cache_column => :rating_average)
+      @@options = options.reverse_merge(
+        :stars => 5,
+        :allow_update => true,
+        :cache_column => :rating_average
+      )
       include AjaxfulRating::InstanceMethods
       extend AjaxfulRating::SingletonMethods
     end

@@ -139,12 +139,12 @@ h2. Feedback
 
 I'll really appreciate your feedback, please contact me at edgar.js[at]gmail.com
 
+h2. Credits
+
+The helper's style is from http://www.komodomedia.com/blog/2007/01/css-star-rating-redux/ with author's permission.
+
 h2. License
 
 This code is released under Creative Commons Attribution-Share Alike 3.0 license.
 
 !http://i.creativecommons.org/l/by-sa/3.0/88x31.png!:http://creativecommons.org/licenses/by-sa/3.0/
-
-h3. Credits
-
-The helper's style was taken from http://www.komodomedia.com/blog/2007/01/css-star-rating-redux/ with author's permission.
