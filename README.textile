@@ -26,7 +26,7 @@ Also this generator copies the necesary images, styles, etc.
 
 Example:
 
-  # I suppose you have generated already an authenticated model.
+  #I suppose you have generated already an authenticated model.
   script/generate authenticated user sessions
   
   script/generate ajaxful_rating user
@@ -64,15 +64,17 @@ map a rate action:
 h3. Use it
 
 To add the star links you need to call the helper method @ratings_for@.
-It tries to call @current_user@ method as the rater instance. If it's nil then the stars
-will not be _linkeables_.
+It tries to call @current_user@ method as the rater instance. You can pass @:static@ as the second param to display only the static stars (not clickables).
 
   <pre><code>
   # show.html.erb
   <%= ratings_for @article %>
+  
+  # To display static stars:
+  <%= ratings_for @article, :static %>
   </code></pre>
 
-You can specify a custom user instance by passing it as parameter.
+Or you can specify a custom user instance by passing it as parameter.
 
   <pre><code>
   <%= ratings_for @article, @user %>
@@ -138,6 +140,8 @@ If you want to customise the name of the cache column just pass it in the option
   </code></pre>
 
 h2. About backwards compatibility
+
+*Version 2.0 of the plugin works only from Rails 2.2 and on. It uses the module @I18n@ which is new in rails 2.2. Please note that you can use it in past versions as long as you _customise_ the source code.*
 
 I decided to jump directly to version 2.0 because there are many important changes. You can always
 checkout the version 1.0 from the repository though.
