@@ -10,7 +10,7 @@ module AjaxfulRating # :nodoc:
   end
 
   module ClassMethods
-    mattr_reader :options
+    attr_reader :options
 
     # Extends the model to be easy ajaxly rateable.
     #
@@ -26,7 +26,7 @@ module AjaxfulRating # :nodoc:
     def ajaxful_rateable(options = {})
       has_many :rates, :as => :rateable, :dependent => :destroy
 
-      @@options = options.reverse_merge(
+      @options = options.reverse_merge(
         :stars => 5,
         :allow_update => true,
         :cache_column => :rating_average
