@@ -106,7 +106,7 @@ example (if you added the @rate@ route):
     @article.rate(params[:stars], current_user)
     id = "ajaxful-rating-article-#{@article.id}"
     render :update do |page|
-      page.replace_html id, ratings_for(@article, :static)
+      page.replace_html id, ratings_for(@article, :static, :wrap => false)
       page.insert_html :bottom, id, "Thanks for rating!"
       page.visual_effect :highlight, id
     end
@@ -155,6 +155,8 @@ I'll really appreciate your feedback, please contact me at edgar.js[at]gmail.com
 h2. Credits
 
 The helper's style is from "komodomedia":http://www.komodomedia.com/blog/2007/01/css-star-rating-redux/ with author's permission.
+
+If you need the psd files of the stars you can grab them "here":http://files.mimbles.net/zips/ajaxful_rating_stars.zip
 
 h2. License
 

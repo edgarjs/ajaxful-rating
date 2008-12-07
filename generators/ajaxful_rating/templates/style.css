@@ -7,7 +7,7 @@
 .ajaxful-rating a:active,
 .ajaxful-rating a:focus,
 .ajaxful-rating .current-rating{
-    background: url(/images/ajaxful_rating/star.gif) left -1000px repeat-x;
+    background: url(/images/ajaxful_rating/star.png) left -1000px repeat-x;
 }
 .ajaxful-rating{
     position: relative;
@@ -78,7 +78,7 @@ z-index: 2;
 .small-star a:active,
 .small-star a:focus,
 .small-star .current-rating{
-    background-image: url(/images/ajaxful_rating/star_small.gif);
+    background-image: url(/images/ajaxful_rating/star_small.png);
     line-height: 10px;
     height: 10px;
 }

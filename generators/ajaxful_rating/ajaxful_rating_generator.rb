@@ -16,8 +16,8 @@ class AjaxfulRatingGenerator < Rails::Generator::NamedBase
       
       # style
       m.directory 'public/images/ajaxful_rating'
-      m.file 'images/star.gif', 'public/images/ajaxful_rating/star.gif'
-      m.file 'images/star_small.gif', 'public/images/ajaxful_rating/star_small.gif'
+      m.file 'images/star.png', 'public/images/ajaxful_rating/star.png'
+      m.file 'images/star_small.png', 'public/images/ajaxful_rating/star_small.png'
       m.file 'style.css', 'public/stylesheets/ajaxful_rating.css'
     end
   end
