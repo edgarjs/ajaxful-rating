@@ -115,6 +115,20 @@ example (if you added the @rate@ route):
 
 There are some more options for this helper, please see the rdoc for details.
 
+h3. Namespaces
+
+If you use the plugin inside a namespace you'll need to specify the rating url which should points to a controller inside a namespace. Your files should be like these:
+
+  <pre><code>
+  routes.rb:
+  map.namespace :admin do |admin|
+    admin.resources :articles, :member => {:rate => :post}
+  end
+  
+  views/admin/articles/show.html.erb
+  <%= ratings_for @article, :remote_options => {:url => rate_admin_article_path(@article)} %>
+  </code></pre>
+
 h3. Cache
 
 To cache the model's rating average add a column named @rating_average@ to your model table:
