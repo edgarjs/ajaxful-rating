@@ -4,7 +4,7 @@ class CreateRates < ActiveRecord::Migration
       t.references :<%= file_name %>
       t.references :rateable, :polymorphic => true
       t.integer :stars
-
+      t.string :dimension      
       t.timestamps
     end
     
