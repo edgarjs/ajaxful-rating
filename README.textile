@@ -1,6 +1,6 @@
 h1. Ajaxful Rating
 
-Provides a simple way to add rating functionality to your application.
+Provides a simple way to add rating functionality to your application. (Modified to allow 'dimensional' ratings, or ratings for multiple dimensions of a single model. Note: cached ratings don't work in this fork.)
 
 h2. Repository
 
@@ -48,6 +48,14 @@ customise this call:
   end
   </code></pre>
 
+Or, if you want to use dimensions, something like:
+
+	<pre><code>
+	class Article < ActiveRecord::Base
+	  ajaxful_rateable :dimensions => ['spelling', 'creativity']
+	end
+	</code></pre>
+
 Then you need to add a call @ajaxful_rater@ in the user model. This includes a simple line so
 you can add it _by your own_ as well (@has_many :rates@).
 
@@ -91,12 +99,11 @@ correct action in your controller:
 
 To display the ratings for a particular dimension:
 
-	<pre><code>
-	<%= ratings_for @article, :dimension => 'spelling' %>
-	</code></pre>
+  <pre><code>
+  <%= ratings_for @article, :dimension => 'spelling' %>
+  </code></pre>
 	
 This will use only ratings on the article that have the string 'spelling' set as their dimension column.
-
 
 
 *To display the stars properly you need to add a call in the head of your layout, which will generate the
@@ -124,7 +131,7 @@ example (if you added the @rate@ route):
   end
   </code></pre>
 
-Or, do add a rating on a dimension:
+Or, to add a rating on a dimension:
 
 @article.rate(params[:stars], current_user, 'spelling')
 
@@ -144,7 +151,7 @@ If you use the plugin inside a namespace you'll need to specify the rating url w
   <%= ratings_for @article, :remote_options => {:url => rate_admin_article_path(@article)} %>
   </code></pre>
 
-h3. Cache
+h3. Cache (Note: caching is broken in this dimensions fork)
 
 To cache the model's rating average add a column named @rating_average@ to your model table:
 
