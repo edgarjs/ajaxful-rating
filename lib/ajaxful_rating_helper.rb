@@ -70,18 +70,15 @@ module AjaxfulRating # :nodoc:
       .#{options[:class]} { width: #{rateable.class.max_rate_value * 25}px; }
       .#{options[:small_star_class]} { width: #{rateable.class.max_rate_value * 10}px; }
       )
-      width = (rateable.rate_average(false, options[:dimension]) / rateable.class.max_rate_value.to_f) * 100
+      width = (rateable.rate_average / rateable.class.max_rate_value.to_f) * 100
       ul = content_tag(:ul, options[:html]) do
         Range.new(1, rateable.class.max_rate_value).collect do |i|
-          build_star rateable, user, i, options[:dimension]
-        end.insert(0, content_tag(:li, current_average(rateable, options[:dimension]),
+          build_star rateable, user, i
+        end.insert(0, content_tag(:li, current_average(rateable),
             :class => 'current-rating', :style => "width:#{width}%"))
       end
-      if user.nil?
-        haml_concat content_tag(:div, 'Please <a href="/login">sign in</a> to rate courts', :id => "sign-in-prompt", :style => 'display:none')
-      end
       if options[:wrap]
-        content_tag(:div, ul, :id => "ajaxful-#{options[:dimension] ? "#{options[:dimension]}-" : ''}rating-#{rateable.class.name.downcase}-#{rateable.id}")
+        content_tag(:div, ul, :id => "ajaxful-rating-#{rateable.class.name.downcase}-#{rateable.id}")
       else
         ul
       end
@@ -101,7 +98,7 @@ module AjaxfulRating # :nodoc:
     private
   
     # Builds a star
-    def build_star(rateable, user, i, dimension = nil)
+    def build_star(rateable, user, i)
       a_class = "#{options[:link_class_prefix]}-#{i}"
       ajaxful_styles << %Q(
         .#{options[:class]} .#{a_class}{
@@ -109,10 +106,10 @@ module AjaxfulRating # :nodoc:
             z-index: #{rateable.class.max_rate_value + 2 - i};
         }
       )
-      star = if user && ((rateable.rated_by?(user, dimension) && rateable.class.options[:allow_update]) || !rateable.rated_by?(user, dimension))
-        link_to_remote(i, build_remote_options({:class => a_class, :title => pluralize_title(i, rateable.class.max_rate_value, dimension)}, i, dimension))
+      star = if user && ((rateable.rated_by?(user) && rateable.class.options[:allow_update]) || !rateable.rated_by?(user))
+        link_to_remote(i, build_remote_options({:class => a_class, :title => pluralize_title(i, rateable.class.max_rate_value)}, i))
       else
-        link_to(i, '#', :class => a_class, :title => pluralize_title(i, rateable.class.max_rate_value, dimension), :onclick => "new Lightbox.base('sign-in-prompt', {closeOnOverlayClick:true}); this.blur(); return false;")
+        content_tag(:span, i, :class => a_class, :title => current_average(rateable))
       end
       content_tag(:li, star)
     end
@@ -131,18 +128,15 @@ module AjaxfulRating # :nodoc:
     end
   
     # Builds the proper title for the star.
-    def pluralize_title(current, max, dimension = nil)
-      # (current == 1) ? I18n.t('ajaxful_rating.stars.title.one', :max => max, :default => "1 star out of {{max}}") :
-      #   I18n.t('ajaxful_rating.stars.title.other', :count => current, :max => max, :default => "{{count}} stars out of {{max}}")
-      (current == 1) ? "1 star out of #{max}" : "#{current} stars out of #{max}"
+    def pluralize_title(current, max)
+      (current == 1) ? I18n.t('ajaxful_rating.stars.title.one', :max => max, :default => "1 star out of {{max}}") :
+        I18n.t('ajaxful_rating.stars.title.other', :count => current, :max => max, :default => "{{count}} stars out of {{max}}")
     end
     
     # Returns the current average string.
-    def current_average(rateable, dimension = nil)
-      # I18n.t('ajaxful_rating.stars.current_average', :average => rateable.rate_average(dimension),
-      #   :max => rateable.class.max_rate_value, :default => "Current rating: {{average}}/{{max}}")
-
-      "Current rating: #{rateable.rate_average(false, dimension)}/#{rateable.class.max_rate_value}"
+    def current_average(rateable)
+      I18n.t('ajaxful_rating.stars.current_average', :average => rateable.rate_average,
+        :max => rateable.class.max_rate_value, :default => "Current rating: {{average}}/{{max}}")
     end
   
     # Temporary instance to hold dynamic styles.
@@ -151,8 +145,8 @@ module AjaxfulRating # :nodoc:
     end
   
     # Builds the default options for the link_to_remote function.
-    def build_remote_options(html, i, dimension = nil)
-      options[:remote_options].reverse_merge(:html => html).merge(:url => "#{options[:remote_options][:url]}?#{{:stars => i, :dimension => dimension}.to_query}")
+    def build_remote_options(html, i)
+      options[:remote_options].reverse_merge(:html => html).merge(:url => "#{options[:remote_options][:url]}?#{{:stars => i}.to_query}")
     end
   
     # Extracts the hash options and returns the user instance.
