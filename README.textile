@@ -40,6 +40,7 @@ customise this call:
 * @:stars@ Max number of stars that can be submitted.
 * @:allow_update@ Set to true if you want users to be able to update their votes.
 * @:cache_column@ Name of the column for storing the cached rating average.
+* @:dimensions@ Array of dimensions (strings) 
 
   <pre><code>
   class Article < ActiveRecord::Base
@@ -88,6 +89,16 @@ correct action in your controller:
   <%= ratings_for @article, :remote_options => {:url => your_rate_path(@article)} %>
   </code></pre>
 
+To display the ratings for a particular dimension:
+
+	<pre><code>
+	<%= ratings_for @article, :dimension => 'spelling' %>
+	</code></pre>
+	
+This will use only ratings on the article that have the string 'spelling' set as their dimension column.
+
+
+
 *To display the stars properly you need to add a call in the head of your layout, which will generate the
 required CSS style for the list. Also don't forget to include the javascripts.*
 
@@ -112,6 +123,10 @@ example (if you added the @rate@ route):
     end
   end
   </code></pre>
+
+Or, do add a rating on a dimension:
+
+@article.rate(params[:stars], current_user, 'spelling')
 
 There are some more options for this helper, please see the rdoc for details.
 
