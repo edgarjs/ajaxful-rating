@@ -24,7 +24,14 @@ module AjaxfulRating # :nodoc:
     #     ajaxful_rateable :stars => 10, :cache_column => :custom_column
     #   end
     def ajaxful_rateable(options = {})
-      has_many :rates, :as => :rateable, :dependent => :destroy
+      has_many :rates_without_dimension, :as => :rateable, :class_name => 'Rate',
+        :dependent => :destroy, :conditions => {:dimension => nil}
+
+      
+      options[:dimensions].each do |dimension|
+        has_many "#{dimension}_rates", :dependent => :destroy,
+          :conditions => {:dimension => dimension.to_s}, :class_name => 'Rate', :as => :rateable
+      end if options[:dimensions].is_a?(Array)
 
       @options = options.reverse_merge(
         :stars => 5,
@@ -59,14 +66,15 @@ module AjaxfulRating # :nodoc:
     #   # Articles Controller
     #   def rate
     #     @article = Article.find(params[:id])
-    #     @article.rate(params[:stars], current_user)
+    #     @article.rate(params[:stars], current_user, params[:dimension])
     #     # some page update here ...
     #   end
-    def rate(stars, user)
+    def rate(stars, user, dimension = nil)
       return false if (stars.to_i > self.class.max_rate_value)
-      raise AlreadyRatedError if (!self.class.options[:allow_update] && rated_by?(user))
+      raise AlreadyRatedError if (!self.class.options[:allow_update] && rated_by?(user, dimension))
 
-      rate = (self.class.options[:allow_update] && rated_by?(user)) ? rate_by(user) : rates.build
+      rate = (self.class.options[:allow_update] && rated_by?(user, dimension)) ?
+        rate_by(user, dimension) : rates(dimension).build
       rate.stars = stars
       if user.respond_to?(:rates)
         user.rates << rate
@@ -74,7 +82,7 @@ module AjaxfulRating # :nodoc:
         rate.send "#{self.class.user_class_name}_id=", user.id
       end if rate.new_record?
       rate.save!
-      self.update_cached_average
+      self.update_cached_average(dimension)
     end
 
     # Returns an array with all users that have rated this object.
@@ -87,41 +95,59 @@ module AjaxfulRating # :nodoc:
     end
 
     # Finds the rate made by the user if he/she has already voted.
-    def rate_by(user)
-      rates.send "find_by_#{self.class.user_class_name}_id", user
+    def rate_by(user, dimension = nil)
+      filter = "find_by_#{self.class.user_class_name}_id"
+      rates(dimension).send filter, user
     end
 
     # Return true if the user has rated the object, otherwise false
-    def rated_by?(user)
-      !rate_by(user).nil?
+    def rated_by?(user, dimension = nil)
+      !rate_by(user, dimension).nil?
     end
 
     # Instance's total rates.
-    def total_rates
-      rates.size
+    def total_rates(dimension = nil)
+      rates(dimension).size
     end
 
     # Total sum of the rates.
-    def rates_sum
-      rates.sum(:stars)
+    def rates_sum(dimension = nil)
+      rates(dimension).sum(:stars)
     end
 
     # Rating average for the object.
     #
     # Pass false as param to force the calculation if you are caching it.
-    def rate_average(cached = true)
-      avg = if cached && self.class.caching_average?
-        send(self.class.options[:cache_column]).to_f
+    def rate_average(cached = true, dimension = nil)
+      avg = if cached && self.class.caching_average?(dimension)
+        send(caching_column_name(dimension)).to_f
       else
-        self.rates_sum.to_f / self.total_rates.to_f
+        self.rates_sum(dimension).to_f / self.total_rates(dimension).to_f
       end
       avg.nan? ? 0.0 : avg
     end
 
+    # Overrides the default +rates+ method and returns the propper array
+    # for the dimension passed.
+    #
+    # It may works as an alias for +dimension_rates+ methods.
+    def rates(dimension = nil)
+      unless dimension.blank?
+        send "#{dimension}_rates"
+      else
+        rates_without_dimension
+      end
+    end
+
+    # Returns the name of the cache column for the passed dimension.
+    def caching_column_name(dimension = nil)
+      self.class.caching_column_name(dimension)
+    end
+
     # Updates the cached average column in the rateable model.
-    def update_cached_average
-      if self.class.caching_average?
-        send("#{self.class.options[:cache_column]}=", self.rate_average(false))
+    def update_cached_average(dimension = nil)
+      if self.class.caching_average?(dimension)
+        send("#{caching_column_name(dimension)}=", self.rate_average(false, dimension))
         save!
       end
     end
@@ -148,13 +174,13 @@ module AjaxfulRating # :nodoc:
     end
 
     # Finds the rateable object with the highest rate average.
-    def find_most_popular
-      all.sort_by(&:rate_average).last
+    def find_most_popular(dimension = nil)
+      all.sort_by { |o| o.rate_average(true, dimension) }.last
     end
 
     # Finds the rateable object with the lowest rate average.
-    def find_less_popular
-      all.sort_by(&:rate_average).first
+    def find_less_popular(dimension = nil)
+      all.sort_by { |o| o.rate_average(true, dimension) }.first
     end
 
     # Finds rateable objects by Rate's attribute.
@@ -178,8 +204,15 @@ module AjaxfulRating # :nodoc:
     #
     #   ajaxful_rateable :cache_column => :my_custom_column
     #
-    def caching_average?
-      column_names.include?(options[:cache_column].to_s)
+    def caching_average?(dimension = nil)
+      column_names.include?(caching_column_name(dimension))
+    end
+
+    # Returns the name of the cache column for the passed dimension.
+    def caching_column_name(dimension = nil)
+      name = options[:cache_column].to_s
+      name += "_#{dimension.to_s.underscore}" unless dimension.blank?
+      name
     end
   end
 end

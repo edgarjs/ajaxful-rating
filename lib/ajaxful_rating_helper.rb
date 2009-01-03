@@ -70,7 +70,7 @@ module AjaxfulRating # :nodoc:
       .#{options[:class]} { width: #{rateable.class.max_rate_value * 25}px; }
       .#{options[:small_star_class]} { width: #{rateable.class.max_rate_value * 10}px; }
       )
-      width = (rateable.rate_average / rateable.class.max_rate_value.to_f) * 100
+      width = (rateable.rate_average(true, options[:dimension]) / rateable.class.max_rate_value.to_f) * 100
       ul = content_tag(:ul, options[:html]) do
         Range.new(1, rateable.class.max_rate_value).collect do |i|
           build_star rateable, user, i
@@ -78,7 +78,8 @@ module AjaxfulRating # :nodoc:
             :class => 'current-rating', :style => "width:#{width}%"))
       end
       if options[:wrap]
-        content_tag(:div, ul, :id => "ajaxful-rating-#{rateable.class.name.downcase}-#{rateable.id}")
+        content_tag(:div, ul, :id => "ajaxful-rating-#{!options[:dimension].blank? ?
+          "#{options[:dimension]}-" : ''}#{rateable.class.name.downcase}-#{rateable.id}")
       else
         ul
       end
@@ -92,7 +93,8 @@ module AjaxfulRating # :nodoc:
     #     <%= ajaxful_rating_style %>
     #   </head>
     def ajaxful_rating_style
-      stylesheet_link_tag('ajaxful_rating') + content_tag(:style, ajaxful_styles, :type => 'text/css') unless ajaxful_styles.blank?
+      stylesheet_link_tag('ajaxful_rating') + content_tag(:style, ajaxful_styles,
+        :type => 'text/css') unless ajaxful_styles.blank?
     end
   
     private
@@ -106,7 +108,8 @@ module AjaxfulRating # :nodoc:
             z-index: #{rateable.class.max_rate_value + 2 - i};
         }
       )
-      star = if user && ((rateable.rated_by?(user) && rateable.class.options[:allow_update]) || !rateable.rated_by?(user))
+      rated = rateable.rated_by?(user, options[:dimension]) if user
+      star = if user && ((rated && rateable.class.options[:allow_update]) || !rated)
         link_to_remote(i, build_remote_options({:class => a_class, :title => pluralize_title(i, rateable.class.max_rate_value)}, i))
       else
         content_tag(:span, i, :class => a_class, :title => current_average(rateable))
@@ -135,7 +138,7 @@ module AjaxfulRating # :nodoc:
     
     # Returns the current average string.
     def current_average(rateable)
-      I18n.t('ajaxful_rating.stars.current_average', :average => rateable.rate_average,
+      I18n.t('ajaxful_rating.stars.current_average', :average => rateable.rate_average(true, options[:dimension]),
         :max => rateable.class.max_rate_value, :default => "Current rating: {{average}}/{{max}}")
     end
   
@@ -146,7 +149,8 @@ module AjaxfulRating # :nodoc:
   
     # Builds the default options for the link_to_remote function.
     def build_remote_options(html, i)
-      options[:remote_options].reverse_merge(:html => html).merge(:url => "#{options[:remote_options][:url]}?#{{:stars => i}.to_query}")
+      options[:remote_options].reverse_merge(:html => html).merge(
+        :url => "#{options[:remote_options][:url]}?#{{:stars => i, :dimension => options[:dimension]}.to_query}")
     end
   
     # Extracts the hash options and returns the user instance.

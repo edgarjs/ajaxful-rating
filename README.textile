@@ -6,6 +6,11 @@ h2. Repository
 
 Find it at "github.com/edgarjs/ajaxful-rating":http://github.com/edgarjs/ajaxful-rating
 
+h2. Demo
+
+You can find a demo working app for this plugin at "http://github.com/edgarjs/ajaxful-rating_demo_app":http://github.com/edgarjs/ajaxful-rating_demo_app
+Just migrate and run...
+
 *******************************************************************
 
 h2. Instructions
@@ -25,8 +30,8 @@ user model. This is necessary to link both the rate and user models.
 Also this generator copies the necesary images, styles, etc.
 
 Example:
+_I suppose you have generated already an authenticated model..._
 
-  I suppose you have generated already an authenticated model.
   script/generate authenticated user sessions
   
   script/generate ajaxful_rating user
@@ -40,10 +45,12 @@ customise this call:
 * @:stars@ Max number of stars that can be submitted.
 * @:allow_update@ Set to true if you want users to be able to update their votes.
 * @:cache_column@ Name of the column for storing the cached rating average.
+* @:dimensions@ Array of dimensions. Allows to rate the model on various specs,
+like for example: a car could be rated for its speed, beauty or price.
 
   <pre><code>
-  class Article < ActiveRecord::Base
-    ajaxful_rateable :stars => 10
+  class Car < ActiveRecord::Base
+    ajaxful_rateable :stars => 10, :dimensions => [:speed, :beauty, :price]
   end
   </code></pre>
 
@@ -59,12 +66,14 @@ you can add it _by your own_ as well (@has_many :rates@).
 Finally, as a mere recomendation to make it even easier, modify your routes to
 map a rate action:
 
-  map.resources :articles, :member => {:rate => :post}
+  map.resources :cars, :member => {:rate => :post}
 
 h3. Use it
 
 To add the star links you need to call the helper method @ratings_for@.
-It tries to call @current_user@ method as the rater instance. You can pass @:static@ as the second param to display only the static stars (not clickables).
+It tries to call @current_user@ method as the rater instance. You can pass @:static@
+as the second param to display only the static stars (not clickables).
+And also you can pass the dimension you want to show the ratings for.
 
   <pre><code>
   # show.html.erb
@@ -72,6 +81,9 @@ It tries to call @current_user@ method as the rater instance. You can pass @:sta
   
   # To display static stars:
   <%= ratings_for @article, :static %>
+
+  # To display the ratings for a dimension:
+  <%= ratings_for @article, :dimension => :speed %>
   </code></pre>
 
 Or you can specify a custom user instance by passing it as parameter.
@@ -103,17 +115,46 @@ example (if you added the @rate@ route):
   <pre><code>
   def rate
     @article = Article.find(params[:id])
-    @article.rate(params[:stars], current_user)
-    id = "ajaxful-rating-article-#{@article.id}"
+    @article.rate(params[:stars], current_user, params[:dimension])
+    id = "ajaxful-rating-#{!params[:dimension].blank? ? "#{params[:dimension]}-" : ''}article-#{@article.id}"
     render :update do |page|
-      page.replace_html id, ratings_for(@article, :static, :wrap => false)
-      page.insert_html :bottom, id, "Thanks for rating!"
+      page.replace_html id, ratings_for(@article, :wrap => false, :dimension => params[:dimension])
       page.visual_effect :highlight, id
     end
   end
   </code></pre>
 
 There are some more options for this helper, please see the rdoc for details.
+
+h3. Dimensions
+
+From now on you can pass an optional parameter to the @rates@ method for your rateable object to retrieve the
+corresponding rates for the dimension you want.
+
+For example, you defined these dimensions:
+
+  <pre><code>
+  class Car < ActiveRecord::Base
+    ajaxful_rateable :dimensions => [:speed, :beauty, :price]
+  end
+  </code></pre>
+
+And hence you can call @car.rates(:price)@ for the price rates or @car.rates(:speed)@ for the speed ratings and so on.
+
+h3. Namespaces
+
+If you use the plugin inside a namespace you’ll need to specify the rating url which should points to
+a controller inside a namespace. Your files should be like these:
+
+  <pre><code>
+  routes.rb:
+  map.namespace :admin do |admin|
+    admin.resources :articles, :member => {:rate => :post}
+  end
+
+  views/admin/articles/show.html.erb
+  <%= ratings_for @article, :remote_options => {:url => rate_admin_article_path(@article)} %>
+  </code></pre>
 
 h3. Cache
 
@@ -139,6 +180,10 @@ If you want to customise the name of the cache column just pass it in the option
   end
   </code></pre>
 
+To use caching with dimensions, make sure you have a cache column defined for each dimension you want cached.
+So if you want to cache the @spelling@ dimension, you’ll need to have a column called @rating_average_spelling@ on the articles table.
+If you use a custom cache column name, follow the pattern @cache_column_name_dimension_name@ to add cache columns for dimensions.
+
 h2. About backwards compatibility
 
 *Version 2.0 of the plugin works only from Rails 2.2 and on. It uses the module @I18n@ which is new in rails 2.2. Please note that you can use it in past versions as long as you _customise_ the source code.*
@@ -148,7 +193,7 @@ checkout the version 1.0 from the repository though.
 
 h2. Feedback
 
-If you find bugs please open a ticket at "http://edgarjs.lighthouseapp.com/projects/21005-ajaxful-rating/overview":http://edgarjs.lighthouseapp.com/projects/21005-ajaxful-rating/overview
+If you find bugs please open a ticket at "http://edgarjs.lighthouseapp.com/projects/21005-ajaxful-rating":http://edgarjs.lighthouseapp.com/projects/21005-ajaxful-rating
 
 I'll really appreciate your feedback, please contact me at edgar.js[at]gmail.com
 
@@ -157,6 +202,8 @@ h2. Credits
 The helper's style is from "komodomedia":http://www.komodomedia.com/blog/2007/01/css-star-rating-redux/ with author's permission.
 
 If you need the psd files of the stars you can grab them "here":http://files.mimbles.net/zips/ajaxful_rating_stars.zip
+
+Thanks to "bborn":http://github.com/bborn for the dimensions base implementation.
 
 h2. License
 
