@@ -147,6 +147,7 @@ module AjaxfulRating # :nodoc:
     # Updates the cached average column in the rateable model.
     def update_cached_average(dimension = nil)
       if self.class.caching_average?(dimension)
+        rates(:refresh).size if self.respond_to?(:rates_count)
         send("#{caching_column_name(dimension)}=", self.rate_average(false, dimension))
         save!
       end
