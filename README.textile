@@ -193,7 +193,7 @@ checkout the version 1.0 from the repository though.
 
 h2. Feedback
 
-If you find bugs please open a ticket at "http://skiblr.mimbles.net/projects/4":http://skiblr.mimbles.net/projects/4
+If you find bugs please open a ticket at "http://edgarjs.lighthouseapp.com/projects/21005-ajaxful-rating":http://edgarjs.lighthouseapp.com/projects/21005-ajaxful-rating
 
 I'll really appreciate your feedback, please contact me at edgar.js[at]gmail.com
 
