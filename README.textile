@@ -18,6 +18,7 @@ h2. Instructions
 h3. Install
 
 To install the plugin:
+
   script/plugin install git://github.com/edgarjs/ajaxful-rating.git
 
 h3. Generate
@@ -193,7 +194,7 @@ checkout the version 1.0 from the repository though.
 
 h2. Feedback
 
-If you find bugs please open a ticket at "http://edgarjs.lighthouseapp.com/projects/21005-ajaxful-rating":http://edgarjs.lighthouseapp.com/projects/21005-ajaxful-rating
+If you find bugs please open a ticket at "http://github.com/edgarjs/ajaxful-rating/issues":http://github.com/edgarjs/ajaxful-rating/issues
 
 I'll really appreciate your feedback, please contact me at edgar.js[at]gmail.com
 
