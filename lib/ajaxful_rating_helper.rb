@@ -119,7 +119,7 @@ module AjaxfulRating # :nodoc:
   
     # Default options for the helper.
     def options
-      @options ||= {
+      @ajaxful_options ||= {
         :wrap => true,
         :class => 'ajaxful-rating',
         :link_class_prefix => :stars,
