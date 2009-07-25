@@ -23,7 +23,11 @@ To install the plugin:
 
 Or the gem
 
-  @sudo gem install edgarjs-ajaxful-rating --source=http://gems.github.com@
+  @sudo gem install edgarjs-ajaxful_rating --source=http://gems.github.com@
+  
+You can configure it in your environment.rb file also:
+
+  @config.gem "edgarjs-ajaxful_rating", :lib => "ajaxful_rating", :source => "http://gems.github.com"@
 
 h3. Generate
 
