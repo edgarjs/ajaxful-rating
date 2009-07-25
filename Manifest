@@ -1,0 +1,16 @@
+ajaxful-rating.gemspec
+CHANGELOG
+generators/ajaxful_rating/ajaxful_rating_generator.rb
+generators/ajaxful_rating/templates/images/star.png
+generators/ajaxful_rating/templates/images/star_small.png
+generators/ajaxful_rating/templates/migration.rb
+generators/ajaxful_rating/templates/model.rb
+generators/ajaxful_rating/templates/style.css
+generators/ajaxful_rating/USAGE
+init.rb
+lib/ajaxful-rating.rb
+lib/ajaxful_rating.rb
+lib/ajaxful_rating_helper.rb
+Manifest
+Rakefile
+README.textile

@@ -23,7 +23,7 @@ To install the plugin:
 
 Or the gem
 
-  @sudo gem install ajaxful-rating --source=http://gems.github.com@
+  @sudo gem install edgarjs-ajaxful-rating --source=http://gems.github.com@
 
 h3. Generate
 
