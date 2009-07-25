@@ -1,22 +1,14 @@
+require 'rubygems'
 require 'rake'
-require 'rake/testtask'
-require 'rake/rdoctask'
+require 'echoe'
 
-desc 'Default: run unit tests.'
-task :default => :test
-
-desc 'Test the ajaxful_rating plugin.'
-Rake::TestTask.new(:test) do |t|
-  t.libs << 'lib'
-  t.pattern = 'test/**/*_test.rb'
-  t.verbose = true
+Echoe.new('ajaxful-rating', '2.1.0') do |p|
+  p.description    = "Provides a simple way to add rating functionality to your application."
+  p.url            = "http://github.com/edgarjs/ajaxful-rating"
+  p.author         = "Edgar J. Suarez"
+  p.email          = "e@dgar.org"
+  p.ignore_pattern = ["tmp/*", "script/*"]
+  p.development_dependencies = []
 end
 
-desc 'Generate documentation for the ajaxful_rating plugin.'
-Rake::RDocTask.new(:rdoc) do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'AjaxfulRating'
-  rdoc.options << '--line-numbers' << '--inline-source'
-  rdoc.rdoc_files.include('README')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end
+Dir["#{File.dirname(__FILE__)}/tasks/*.rake"].sort.each { |ext| load ext }

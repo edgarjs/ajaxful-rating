@@ -133,7 +133,7 @@ module AjaxfulRating # :nodoc:
     # It may works as an alias for +dimension_rates+ methods.
     def rates(dimension = nil)
       unless dimension.blank?
-        send "#{dimension}_rates"
+        send("#{dimension}_rates")
       else
         rates_without_dimension
       end
@@ -216,4 +216,8 @@ module AjaxfulRating # :nodoc:
       name
     end
   end
+end
+
+class ActiveRecord::Base
+  include AjaxfulRating
 end

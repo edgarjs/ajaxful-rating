@@ -19,11 +19,15 @@ h3. Install
 
 To install the plugin:
 
-  script/plugin install git://github.com/edgarjs/ajaxful-rating.git
+  @script/plugin install git://github.com/edgarjs/ajaxful-rating.git@
+
+Or the gem
+
+  @sudo gem install ajaxful-rating --source=http://gems.github.com@
 
 h3. Generate
 
-  script/generate ajaxful_rating UserModelName
+  @script/generate ajaxful_rating UserModelName@
 	
 The generator takes one argument: UserModelName, which is the name of your *current*
 user model. This is necessary to link both the rate and user models.
@@ -33,9 +37,10 @@ Also this generator copies the necesary images, styles, etc.
 Example:
 _I suppose you have generated already an authenticated model..._
 
+  <pre><code>
   script/generate authenticated user sessions
-  
   script/generate ajaxful_rating user
+  </code></pre>
 
 So this call will create a Rate model and will link it to your User model.
 
@@ -67,7 +72,7 @@ you can add it _by your own_ as well (@has_many :rates@).
 Finally, as a mere recomendation to make it even easier, modify your routes to
 map a rate action:
 
-  map.resources :cars, :member => {:rate => :post}
+  @map.resources :cars, :member => {:rate => :post}@
 
 h3. Use it
 
@@ -77,13 +82,13 @@ as the second param to display only the static stars (not clickables).
 And also you can pass the dimension you want to show the ratings for.
 
   <pre><code>
-  # show.html.erb
+  #show.html.erb
   <%= ratings_for @article %>
   
-  # To display static stars:
+  #To display static stars:
   <%= ratings_for @article, :static %>
 
-  # To display the ratings for a dimension:
+  #To display the ratings for a dimension:
   <%= ratings_for @article, :dimension => :speed %>
   </code></pre>
 
@@ -105,7 +110,7 @@ correct action in your controller:
 required CSS style for the list. Also don't forget to include the javascripts.*
 
   <pre><code>
-    # within the head tags of your layout...
+    #within the head tags of your layout...
     <%= javascript_include_tag :defaults %>
     <%= ajaxful_rating_style %>
   </code></pre>
@@ -196,13 +201,13 @@ h2. Feedback
 
 If you find bugs please open a ticket at "http://github.com/edgarjs/ajaxful-rating/issues":http://github.com/edgarjs/ajaxful-rating/issues
 
-I'll really appreciate your feedback, please contact me at edgar.js[at]gmail.com
+I'll really appreciate your feedback, please contact me at e[at]dgar[dot]org
 
 h2. Credits
 
 The helper's style is from "komodomedia":http://www.komodomedia.com/blog/2007/01/css-star-rating-redux/ with author's permission.
 
-If you need the psd files of the stars you can grab them "here":http://files.mimbles.net/zips/ajaxful_rating_stars.zip
+If you need the psd files of the stars you can grab them "here":http://aws3-edgarjs-zips.s3.amazonaws.com/ajaxful_rating_stars.zip
 
 Thanks to "bborn":http://github.com/bborn for the dimensions base implementation.
 

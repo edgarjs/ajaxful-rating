@@ -168,3 +168,7 @@ module AjaxfulRating # :nodoc:
     end
   end
 end
+
+class ActionView::Base
+  include AjaxfulRating::Helper
+end
