@@ -161,8 +161,10 @@ module AjaxfulRating # :nodoc:
         current_user if respond_to?(:current_user)
       end
       options.merge!(args.last) if !args.empty? && args.last.is_a?(Hash)
-      options[:remote_options][:url] ||= respond_to?(url = "rate_#{rateable.class.name.downcase}_path") ?
-        send(url, rateable) : raise(MissingRateRoute)
+      if user
+        options[:remote_options][:url] ||= respond_to?(url = "rate_#{rateable.class.name.downcase}_path") ?
+          send(url, rateable) : raise(MissingRateRoute)
+      end
       options[:html].reverse_merge!(:class => "#{options[:class]} #{options[:small_star_class] if options[:small_stars]}")
       user
     end
