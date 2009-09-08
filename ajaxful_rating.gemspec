@@ -2,15 +2,15 @@
 
 Gem::Specification.new do |s|
   s.name = %q{ajaxful_rating}
-  s.version = "2.1.0"
+  s.version = "2.1.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Edgar J. Suarez"]
-  s.date = %q{2009-07-25}
+  s.date = %q{2009-09-08}
   s.description = %q{Provides a simple way to add rating functionality to your application.}
   s.email = %q{e@dgar.org}
-  s.extra_rdoc_files = ["CHANGELOG", "lib/ajaxful_rating.rb", "lib/ajaxful_rating_helper.rb", "lib/ajaxful_rating_model.rb", "README.textile"]
-  s.files = ["CHANGELOG", "generators/ajaxful_rating/ajaxful_rating_generator.rb", "generators/ajaxful_rating/templates/images/star.png", "generators/ajaxful_rating/templates/images/star_small.png", "generators/ajaxful_rating/templates/migration.rb", "generators/ajaxful_rating/templates/model.rb", "generators/ajaxful_rating/templates/style.css", "generators/ajaxful_rating/USAGE", "init.rb", "lib/ajaxful_rating.rb", "lib/ajaxful_rating_helper.rb", "lib/ajaxful_rating_model.rb", "Manifest", "Rakefile", "README.textile", "ajaxful_rating.gemspec"]
+  s.extra_rdoc_files = ["CHANGELOG", "README.textile", "lib/ajaxful_rating.rb", "lib/ajaxful_rating_helper.rb", "lib/ajaxful_rating_model.rb"]
+  s.files = ["CHANGELOG", "Manifest", "README.textile", "Rakefile", "ajaxful_rating.gemspec", "generators/ajaxful_rating/USAGE", "generators/ajaxful_rating/ajaxful_rating_generator.rb", "generators/ajaxful_rating/templates/images/star.png", "generators/ajaxful_rating/templates/images/star_small.png", "generators/ajaxful_rating/templates/migration.rb", "generators/ajaxful_rating/templates/model.rb", "generators/ajaxful_rating/templates/style.css", "init.rb", "lib/ajaxful_rating.rb", "lib/ajaxful_rating_helper.rb", "lib/ajaxful_rating_model.rb"]
   s.homepage = %q{http://github.com/edgarjs/ajaxful-rating}
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Ajaxful_rating", "--main", "README.textile"]
   s.require_paths = ["lib"]
