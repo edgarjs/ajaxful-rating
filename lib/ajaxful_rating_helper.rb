@@ -150,7 +150,7 @@ module AjaxfulRating # :nodoc:
     # Builds the default options for the link_to_remote function.
     def build_remote_options(html, i)
       options[:remote_options].reverse_merge(:html => html).merge(
-        :url => "#{options[:remote_options][:url]}?#{{:stars => i, :dimension => options[:dimension]}.to_query}")
+        :url => "#{options[:remote_options][:url]}?#{{:stars => i, :dimension => options[:dimension], :small_stars => options[:small_stars]}.to_query}")
     end
   
     # Extracts the hash options and returns the user instance.
@@ -160,11 +160,17 @@ module AjaxfulRating # :nodoc:
       elsif args.first != :static
         current_user if respond_to?(:current_user)
       end
-      options.merge!(args.last) if !args.empty? && args.last.is_a?(Hash)
-      if user
-        options[:remote_options][:url] = respond_to?(url = "rate_#{rateable.class.name.downcase}_path") ?
-          send(url, rateable) : raise(MissingRateRoute)
+      config = (!args.empty? && args.last.is_a?(Hash)) ? args.last : {}
+      if config[:remote_options] && config[:remote_options][:url]
+        # we keep the passed url
+      elsif user
+        config[:remote_options] = {
+          :url => respond_to?(url = "rate_#{rateable.class.name.downcase}_path") ?
+            send(url, rateable) : raise(MissingRateRoute)
+        }
       end
+      config[:small_stars] = (config[:small_stars].downcase == "true") if config[:small_stars].is_a?(String)
+      options.merge!(config)
       options[:html].reverse_merge!(:class => "#{options[:class]} #{options[:small_star_class] if options[:small_stars]}")
       user
     end

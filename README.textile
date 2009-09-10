@@ -2,6 +2,8 @@ h1. Ajaxful Rating
 
 Provides a simple way to add rating functionality to your application.
 
+!http://s3.amazonaws.com/ember/v9SvvO3rdSkA40e1sXBf8JgpuaWCC0uB_o.png!
+
 h2. Repository
 
 Find it at "github.com/edgarjs/ajaxful-rating":http://github.com/edgarjs/ajaxful-rating
