@@ -109,7 +109,7 @@ module AjaxfulRating # :nodoc:
         }
       )
       rated = rateable.rated_by?(user, options[:dimension]) if user
-      star = if user && ((rated && rateable.class.options[:allow_update]) || !rated)
+      star = if options[:force_dynamic] || (user && ((rated && rateable.class.options[:allow_update]) || !rated))
         link_to_remote(i, build_remote_options({:class => a_class, :title => pluralize_title(i, rateable.class.max_rate_value)}, i))
       else
         content_tag(:span, i, :class => a_class, :title => current_average(rateable))
@@ -121,6 +121,7 @@ module AjaxfulRating # :nodoc:
     def options
       @ajaxful_options ||= {
         :wrap => true,
+        :force_dynamic => false,
         :class => 'ajaxful-rating',
         :link_class_prefix => :stars,
         :small_stars => false,
