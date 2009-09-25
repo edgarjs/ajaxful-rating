@@ -17,6 +17,7 @@ module AjaxfulRating # :nodoc:
     # * <tt>:remote_options</tt> Hash of options for the link_to_remote function.
     # Default is {:method => :post, :url => rate_rateablemodel_path(rateable)}.
     # * <tt>:wrap</tt> Whether the star list is wrapped within a div tag or not. This is useful when page updating. Default is true.
+    # * <tt>:force_dynamic</tt> Whether the star list is always clickable. This is useful for page caching when set to true. Default is false.
     # 
     # Example:
     #   <%= ratings_for @article %>
