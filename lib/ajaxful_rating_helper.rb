@@ -166,7 +166,7 @@ module AjaxfulRating # :nodoc:
       config = (!args.empty? && args.last.is_a?(Hash)) ? args.last : {}
       if config[:remote_options] && config[:remote_options][:url]
         # we keep the passed url
-      elsif user
+      else#if user
         config[:remote_options] = {
           :url => respond_to?(url = "rate_#{rateable.class.name.tableize.singularize}_path") ?
             send(url, rateable) : raise(MissingRateRoute)
