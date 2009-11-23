@@ -73,11 +73,9 @@ module AjaxfulRating # :nodoc:
       )
       width = (rateable.rate_average(true, options[:dimension]) / rateable.class.max_rate_value.to_f) * 100
       ul = content_tag(:ul, options[:html]) do
-        head = content_tag(:li, current_average(rateable), :class => 'current-rating', :style => "width:#{width}%")
-        tail = (1..rateable.class.max_rate_value).collect do |i|
+        (1..rateable.class.max_rate_value).collect do |i|
           build_star rateable, user, i
-        end
-        ([head] + tail).join
+        end.insert(0, content_tag(:li, current_average(rateable), :class => 'current-rating', :style => "width:#{width}%")).join
       end
       if options[:wrap]
         content_tag(:div, ul, :class => 'ajaxful-rating-wrapper', :id => "ajaxful-rating-#{!options[:dimension].blank? ?
