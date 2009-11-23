@@ -81,7 +81,7 @@ module AjaxfulRating # :nodoc:
       end
       if options[:wrap]
         content_tag(:div, ul, :class => 'ajaxful-rating-wrapper', :id => "ajaxful-rating-#{!options[:dimension].blank? ?
-          "#{options[:dimension]}-" : ''}#{rateable.class.name.downcase}-#{rateable.id}")
+          "#{options[:dimension]}-" : ''}#{rateable.class.name.tableize.singularize}-#{rateable.id}")
       else
         ul
       end
