@@ -124,17 +124,17 @@ required CSS style for the list. Also don't forget to include the javascripts.*
 When a user submits a rating it will call the action in your controller, for
 example (if you added the @rate@ route):
 
-  <pre>
-  def rate
-    @article = Article.find(params[:id])
-    @article.rate(params[:stars], current_user, params[:dimension])
-    id = "ajaxful-rating-" + (!params[:dimension].blank? ? "#{params[:dimension]}-" : '') + "article-#{@article.id}"
-    render :update do |page|
-      page.replace_html id, ratings_for(@article, :wrap => false, :dimension => params[:dimension])
-      page.visual_effect :highlight, id
-    end
+<pre>
+def rate
+  @article = Article.find(params[:id])
+  @article.rate(params[:stars], current_user, params[:dimension])
+  id = "ajaxful-rating-" + (!params[:dimension].blank? ? "#{params[:dimension]}-" : '') + "article-#{@article.id}"
+  render :update do |page|
+    page.replace_html id, ratings_for(@article, :wrap => false, :dimension => params[:dimension])
+    page.visual_effect :highlight, id
   end
-  </pre>
+end
+</pre>
 
 There are some more options for this helper, please see the rdoc for details.
 
