@@ -43,10 +43,10 @@ Also this generator copies the necesary images, styles, etc.
 Example:
 _I suppose you have generated already an authenticated model..._
 
-  <pre><code>
-  script/generate authenticated user sessions
-  script/generate ajaxful_rating user
-  </code></pre>
+<pre>
+script/generate authenticated user sessions
+script/generate ajaxful_rating user
+</pre>
 
 So this call will create a Rate model and will link it to your User model.
 
@@ -60,20 +60,20 @@ customise this call:
 * @:dimensions@ Array of dimensions. Allows to rate the model on various specs,
 like for example: a car could be rated for its speed, beauty or price.
 
-  <pre><code>
-  class Car < ActiveRecord::Base
-    ajaxful_rateable :stars => 10, :dimensions => [:speed, :beauty, :price]
-  end
-  </code></pre>
+<pre>
+class Car < ActiveRecord::Base
+  ajaxful_rateable :stars => 10, :dimensions => [:speed, :beauty, :price]
+end
+</pre>
 
 Then you need to add a call @ajaxful_rater@ in the user model. This includes a simple line so
 you can add it _by your own_ as well (@has_many :rates@).
 
-  <pre><code>
-  class User < ActiveRecord::Base
-    ajaxful_rater
-  end
-  </code></pre>
+<pre>
+class User < ActiveRecord::Base
+  ajaxful_rater
+end
+</pre>
 
 Finally, as a mere recomendation to make it even easier, modify your routes to
 map a rate action:
@@ -87,39 +87,39 @@ It tries to call @current_user@ method as the rater instance. You can pass @:sta
 as the second param to display only the static stars (not clickables).
 And also you can pass the dimension you want to show the ratings for.
 
-  <pre><code>
-  #show.html.erb
-  <%= ratings_for @article %>
-  
-  #To display static stars:
-  <%= ratings_for @article, :static %>
+<pre>
+#show.html.erb
+<%= ratings_for @article %>
 
-  #To display the ratings for a dimension:
-  <%= ratings_for @article, :dimension => :speed %>
-  </code></pre>
+#To display static stars:
+<%= ratings_for @article, :static %>
+
+#To display the ratings for a dimension:
+<%= ratings_for @article, :dimension => :speed %>
+</pre>
 
 Or you can specify a custom user instance by passing it as parameter.
 
-  <pre><code>
-  <%= ratings_for @article, @user %>
-  </code></pre>
+<pre>
+<%= ratings_for @article, @user %>
+</pre>
 		
 There's a condition here, if you didn't add the route @rate@ to your resource 
 (as shown above) or you named it different, you'll need to pass the url to the
 correct action in your controller:
 
-  <pre><code>
-  <%= ratings_for @article, :remote_options => {:url => your_rate_path(@article)} %>
-  </code></pre>
+<pre>
+<%= ratings_for @article, :remote_options => {:url => your_rate_path(@article)} %>
+</pre>
 
 *To display the stars properly you need to add a call in the head of your layout, which will generate the
 required CSS style for the list. Also don't forget to include the javascripts.*
 
-  <pre><code>
-    #within the head tags of your layout...
-    <%= javascript_include_tag :defaults %>
-    <%= ajaxful_rating_style %>
-  </code></pre>
+<pre>
+  #within the head tags of your layout...
+  <%= javascript_include_tag :defaults %>
+  <%= ajaxful_rating_style %>
+</pre>
 		
 When a user submits a rating it will call the action in your controller, for
 example (if you added the @rate@ route):
@@ -128,7 +128,7 @@ example (if you added the @rate@ route):
 def rate
   @article = Article.find(params[:id])
   @article.rate(params[:stars], current_user, params[:dimension])
-  id = "ajaxful-rating-" + (!params[:dimension].blank? ? "#{params[:dimension]}-" : '') + "article-#{@article.id}"
+  id = "ajaxful-rating-#{!params[:dimension].blank? ? "#{params[:dimension]}-" : ''}article-#{@article.id}"
   render :update do |page|
     page.replace_html id, ratings_for(@article, :wrap => false, :dimension => params[:dimension])
     page.visual_effect :highlight, id
@@ -145,11 +145,11 @@ corresponding rates for the dimension you want.
 
 For example, you defined these dimensions:
 
-  <pre><code>
-  class Car < ActiveRecord::Base
-    ajaxful_rateable :dimensions => [:speed, :beauty, :price]
-  end
-  </code></pre>
+<pre>
+class Car < ActiveRecord::Base
+  ajaxful_rateable :dimensions => [:speed, :beauty, :price]
+end
+</pre>
 
 And hence you can call @car.rates(:price)@ for the price rates or @car.rates(:speed)@ for the speed ratings and so on.
 
@@ -158,39 +158,39 @@ h3. Namespaces
 If you use the plugin inside a namespace you’ll need to specify the rating url which should points to
 a controller inside a namespace. Your files should be like these:
 
-  <pre><code>
-  routes.rb:
-  map.namespace :admin do |admin|
-    admin.resources :articles, :member => {:rate => :post}
-  end
+<pre>
+routes.rb:
+map.namespace :admin do |admin|
+  admin.resources :articles, :member => {:rate => :post}
+end
 
-  views/admin/articles/show.html.erb
-  <%= ratings_for @article, :remote_options => {:url => rate_admin_article_path(@article)} %>
-  </code></pre>
+views/admin/articles/show.html.erb
+<%= ratings_for @article, :remote_options => {:url => rate_admin_article_path(@article)} %>
+</pre>
 
 h3. Cache
 
 To cache the model's rating average add a column named @rating_average@ to your model table:
 
-  <pre><code>
-  class AddRatingAverageToArticles < ActiveRecord::Migration
-    def self.up
-      add_column :articles, :rating_average, :decimal, :default => 0, :precision => 6, :scale => 2
-    end
-  
-    def self.down
-      remove_column :articles, :rating_average
-    end
+<pre>
+class AddRatingAverageToArticles < ActiveRecord::Migration
+  def self.up
+    add_column :articles, :rating_average, :decimal, :default => 0, :precision => 6, :scale => 2
   end
-  </code></pre>
+
+  def self.down
+    remove_column :articles, :rating_average
+  end
+end
+</pre>
 
 If you want to customise the name of the cache column just pass it in the options hash:
 
-  <pre><code>
-  class Article < ActiveRecord::Base
-    ajaxful_rateable :cache_column => :my_cached_rating
-  end
-  </code></pre>
+<pre>
+class Article < ActiveRecord::Base
+  ajaxful_rateable :cache_column => :my_cached_rating
+end
+</pre>
 
 To use caching with dimensions, make sure you have a cache column defined for each dimension you want cached.
 So if you want to cache the @spelling@ dimension, you’ll need to have a column called @rating_average_spelling@ on the articles table.
