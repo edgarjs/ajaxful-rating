@@ -54,6 +54,13 @@ module AjaxfulRating # :nodoc:
     #     # update page, etc.
     #   end
     # 
+    # By default ratings_for will render the average rating for all users. If however you would like to display the rating for a single user, then set the :show_user_rating option to true.
+    # For example:
+    #
+    #   <%= ratings_for @article, :show_user_rating => true %>
+    # Or
+    #   <%= ratings_for @article, @user, :show_user_rating => true %>
+    #
     # I18n:
     # 
     # You can translate the title of the images (the tool tip that shows when the mouse is over) and the 'Currently x/x stars'
@@ -66,12 +73,16 @@ module AjaxfulRating # :nodoc:
     #         one: 1 star out of {{total}}
     #         other: "{{count}} stars out of {{total}}"
     def ratings_for(rateable, *args)
+      puts y(args)
       user = extract_options(rateable, *args)
+      user_rating = if options[:show_user_rating] == true
+        rateable.rates(options[:dimension]).find_by_user_id(user).stars
+      end
       ajaxful_styles << %Q(
       .#{options[:class]} { width: #{rateable.class.max_rate_value * 25}px; }
       .#{options[:small_star_class]} { width: #{rateable.class.max_rate_value * 10}px; }
       )
-      width = (rateable.rate_average(true, options[:dimension]) / rateable.class.max_rate_value.to_f) * 100
+      width = ((user_rating ? user_rating : rateable.rate_average(true, options[:dimension])) / rateable.class.max_rate_value.to_f) * 100
       ul = content_tag(:ul, options[:html]) do
         (1..rateable.class.max_rate_value).collect do |i|
           build_star rateable, user, i
@@ -156,6 +167,7 @@ module AjaxfulRating # :nodoc:
   
     # Extracts the hash options and returns the user instance.
     def extract_options(rateable, *args)
+      options[:show_user_rating] = false  # Reset
       user = if args.first.class.name == rateable.class.user_class_name.classify
         args.shift
       elsif args.first != :static

@@ -103,7 +103,19 @@ Or you can specify a custom user instance by passing it as parameter.
 <pre>
 <%= ratings_for @article, @user %>
 </pre>
-		
+
+By default ratings_for will display the average user rating. If you would like it to
+display the rating for the current_user, then set the :show_user_rating parameter to true.
+For example:
+
+<pre>
+# To display the rating for the current user (current_user):
+<%= ratings_for @article, :show_user_rating => true %>
+
+# To display the rating for the user specified by @user:
+<%= ratings_for @article, @user, :show_user_rating => true %>
+</pre>
+
 There's a condition here, if you didn't add the route @rate@ to your resource 
 (as shown above) or you named it different, you'll need to pass the url to the
 correct action in your controller:
