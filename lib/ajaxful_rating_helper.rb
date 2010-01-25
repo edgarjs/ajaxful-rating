@@ -75,8 +75,10 @@ module AjaxfulRating # :nodoc:
     def ratings_for(rateable, *args)
       puts y(args)
       user = extract_options(rateable, *args)
-      user_rating = if options[:show_user_rating] == true
+      user_rating = if options[:show_user_rating] == true and rateable.rated_by?(user, options[:dimension])
         rateable.rates(options[:dimension]).find_by_user_id(user).stars
+      else
+        user_rating = 0
       end
       ajaxful_styles << %Q(
       .#{options[:class]} { width: #{rateable.class.max_rate_value * 25}px; }
