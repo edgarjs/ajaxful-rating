@@ -73,7 +73,6 @@ module AjaxfulRating # :nodoc:
     #         one: 1 star out of {{total}}
     #         other: "{{count}} stars out of {{total}}"
     def ratings_for(rateable, *args)
-      puts y(args)
       user = extract_options(rateable, *args)
       user_rating = if options[:show_user_rating] == true and rateable.rated_by?(user, options[:dimension])
         rateable.rates(options[:dimension]).find_by_user_id(user).stars
@@ -84,7 +83,7 @@ module AjaxfulRating # :nodoc:
       .#{options[:class]} { width: #{rateable.class.max_rate_value * 25}px; }
       .#{options[:small_star_class]} { width: #{rateable.class.max_rate_value * 10}px; }
       )
-      width = ((user_rating ? user_rating : rateable.rate_average(true, options[:dimension])) / rateable.class.max_rate_value.to_f) * 100
+      width = ((options[:show_user_rating] == true ? user_rating : rateable.rate_average(true, options[:dimension])) / rateable.class.max_rate_value.to_f) * 100
       ul = content_tag(:ul, options[:html]) do
         (1..rateable.class.max_rate_value).collect do |i|
           build_star rateable, user, i
