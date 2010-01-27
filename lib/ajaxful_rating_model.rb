@@ -148,8 +148,7 @@ module AjaxfulRating # :nodoc:
     def update_cached_average(dimension = nil)
       if self.class.caching_average?(dimension)
         rates(:refresh).size if self.respond_to?(:rates_count)
-        send("#{caching_column_name(dimension)}=", self.rate_average(false, dimension))
-        save!
+        update_attribute caching_column_name(dimension), self.rate_average(false, dimension)
       end
     end
   end
