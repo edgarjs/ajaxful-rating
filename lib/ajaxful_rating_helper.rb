@@ -74,24 +74,22 @@ module AjaxfulRating # :nodoc:
     #         other: "{{count}} stars out of {{total}}"
     def ratings_for(rateable, *args)
       user = extract_options(rateable, *args)
-      user_rating = if options[:show_user_rating] == true and rateable.rated_by?(user, options[:dimension])
-        rateable.rates(options[:dimension]).find_by_user_id(user).stars
+      user_rating = if ajaxful_rating_options[:show_user_rating] == true and rateable.rated_by?(user, ajaxful_rating_options[:dimension])
+        rateable.rates(ajaxful_rating_options[:dimension]).find_by_user_id(user).stars
       else
         user_rating = 0
       end
-      ajaxful_styles << %Q(
-      .#{options[:class]} { width: #{rateable.class.max_rate_value * 25}px; }
-      .#{options[:small_star_class]} { width: #{rateable.class.max_rate_value * 10}px; }
-      )
-      width = ((options[:show_user_rating] == true ? user_rating : rateable.rate_average(true, options[:dimension])) / rateable.class.max_rate_value.to_f) * 100
-      ul = content_tag(:ul, options[:html]) do
+      ajaxful_styles[ajaxful_rating_options[:class]] ||= ".#{ajaxful_rating_options[:class]} { width: #{rateable.class.max_rate_value * 25}px; }"
+      ajaxful_styles[ajaxful_rating_options[:small_star_class]] ||= ".#{ajaxful_rating_options[:class]}.#{ajaxful_rating_options[:small_star_class]} { width: #{rateable.class.max_rate_value * 10}px; }"
+      width = ((ajaxful_rating_options[:show_user_rating] == true ? user_rating : rateable.rate_average(true, ajaxful_rating_options[:dimension])) / rateable.class.max_rate_value.to_f) * 100
+      ul = content_tag(:ul, ajaxful_rating_options[:html]) do
         (1..rateable.class.max_rate_value).collect do |i|
           build_star rateable, user, i
         end.insert(0, content_tag(:li, current_average(rateable), :class => 'current-rating', :style => "width:#{width}%")).join
       end
-      if options[:wrap]
-        content_tag(:div, ul, :class => 'ajaxful-rating-wrapper', :id => "ajaxful-rating-#{!options[:dimension].blank? ?
-          "#{options[:dimension]}-" : ''}#{rateable.class.name.tableize.singularize}-#{rateable.id}")
+      if ajaxful_rating_options[:wrap]
+        content_tag(:div, ul, :class => 'ajaxful-rating-wrapper', :id => "ajaxful-rating-#{!ajaxful_rating_options[:dimension].blank? ?
+          "#{ajaxful_rating_options[:dimension]}-" : ''}#{rateable.class.name.tableize.singularize}-#{rateable.id}")
       else
         ul
       end
@@ -105,7 +103,7 @@ module AjaxfulRating # :nodoc:
     #     <%= ajaxful_rating_style %>
     #   </head>
     def ajaxful_rating_style
-      stylesheet_link_tag('ajaxful_rating') + content_tag(:style, ajaxful_styles,
+      stylesheet_link_tag('ajaxful_rating') + content_tag(:style, ajaxful_styles.values.join("\n"),
         :type => 'text/css') unless ajaxful_styles.blank?
     end
   
@@ -113,15 +111,16 @@ module AjaxfulRating # :nodoc:
   
     # Builds a star
     def build_star(rateable, user, i)
-      a_class = "#{options[:link_class_prefix]}-#{i}"
-      ajaxful_styles << %Q(
-        .#{options[:class]} .#{a_class}{
+      a_class = "#{ajaxful_rating_options[:link_class_prefix]}-#{i}"
+      selector = ".#{ajaxful_rating_options[:class]} .#{a_class}"
+      ajaxful_styles[selector] ||= <<-EOS
+        #{selector} {
             width: #{(i / rateable.class.max_rate_value.to_f) * 100}%;
             z-index: #{rateable.class.max_rate_value + 2 - i};
         }
-      )
-      rated = rateable.rated_by?(user, options[:dimension]) if user
-      star = if options[:force_dynamic] || (user && ((rated && rateable.class.options[:allow_update]) || !rated))
+      EOS
+      rated = rateable.rated_by?(user, ajaxful_rating_options[:dimension]) if user
+      star = if ajaxful_rating_options[:force_dynamic] || (user && ((rated && rateable.class.ajaxful_rating_options[:allow_update]) || !rated))
         link_to_remote(i, build_remote_options({:class => a_class, :title => pluralize_title(i, rateable.class.max_rate_value)}, i))
       else
         content_tag(:span, i, :class => a_class, :title => current_average(rateable))
@@ -130,8 +129,8 @@ module AjaxfulRating # :nodoc:
     end
   
     # Default options for the helper.
-    def options
-      @ajaxful_options ||= {
+    def ajaxful_rating_options
+      @ajaxful_rating_options ||= {
         :wrap => true,
         :force_dynamic => false,
         :class => 'ajaxful-rating',
@@ -151,24 +150,24 @@ module AjaxfulRating # :nodoc:
     
     # Returns the current average string.
     def current_average(rateable)
-      I18n.t('ajaxful_rating.stars.current_average', :average => rateable.rate_average(true, options[:dimension]),
+      I18n.t('ajaxful_rating.stars.current_average', :average => rateable.rate_average(true, ajaxful_rating_options[:dimension]),
         :max => rateable.class.max_rate_value, :default => "Current rating: {{average}}/{{max}}")
     end
   
     # Temporary instance to hold dynamic styles.
     def ajaxful_styles
-      @ajaxful_styles ||= ''
+      @ajaxful_styles ||= {}
     end
   
     # Builds the default options for the link_to_remote function.
     def build_remote_options(html, i)
-      options[:remote_options].reverse_merge(:html => html).merge(
-        :url => "#{options[:remote_options][:url]}?#{{:stars => i, :dimension => options[:dimension], :small_stars => options[:small_stars]}.to_query}")
+      ajaxful_rating_options[:remote_options].reverse_merge(:html => html).merge(
+        :url => "#{ajaxful_rating_options[:remote_options][:url]}?#{{:stars => i, :dimension => ajaxful_rating_options[:dimension], :small_stars => ajaxful_rating_options[:small_stars]}.to_query}")
     end
   
     # Extracts the hash options and returns the user instance.
     def extract_options(rateable, *args)
-      options[:show_user_rating] = false  # Reset
+      ajaxful_rating_options[:show_user_rating] = false  # Reset
       user = if args.first.class.name == rateable.class.user_class_name.classify
         args.shift
       elsif args.first != :static
@@ -184,8 +183,8 @@ module AjaxfulRating # :nodoc:
         }
       end
       config[:small_stars] = (config[:small_stars].downcase == "true") if config[:small_stars].is_a?(String)
-      options.merge!(config)
-      options[:html].reverse_merge!(:class => "#{options[:class]} #{options[:small_star_class] if options[:small_stars]}")
+      ajaxful_rating_options.merge!(config)
+      ajaxful_rating_options[:html].reverse_merge!(:class => "#{ajaxful_rating_options[:class]} #{ajaxful_rating_options[:small_star_class] if ajaxful_rating_options[:small_stars]}")
       user
     end
   end

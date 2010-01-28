@@ -10,7 +10,7 @@ module AjaxfulRating # :nodoc:
   end
 
   module ClassMethods
-    attr_reader :options
+    attr_reader :ajaxful_rating_options
 
     # Extends the model to be easy ajaxly rateable.
     #
@@ -33,7 +33,7 @@ module AjaxfulRating # :nodoc:
           :conditions => {:dimension => dimension.to_s}, :class_name => 'Rate', :as => :rateable
       end if options[:dimensions].is_a?(Array)
 
-      @options = options.reverse_merge(
+      @ajaxful_rating_options = options.reverse_merge(
         :stars => 5,
         :allow_update => true,
         :cache_column => :rating_average
@@ -53,7 +53,7 @@ module AjaxfulRating # :nodoc:
     #
     #   ajaxful_rateable :stars => 10
     def max_rate_value
-      options[:stars]
+      ajaxful_rating_options[:stars]
     end
   end
 
@@ -71,9 +71,9 @@ module AjaxfulRating # :nodoc:
     #   end
     def rate(stars, user, dimension = nil)
       return false if (stars.to_i > self.class.max_rate_value)
-      raise AlreadyRatedError if (!self.class.options[:allow_update] && rated_by?(user, dimension))
+      raise AlreadyRatedError if (!self.class.ajaxful_rating_options[:allow_update] && rated_by?(user, dimension))
 
-      rate = (self.class.options[:allow_update] && rated_by?(user, dimension)) ?
+      rate = (self.class.ajaxful_rating_options[:allow_update] && rated_by?(user, dimension)) ?
         rate_by(user, dimension) : rates(dimension).build
       rate.stars = stars
       if user.respond_to?(:rates)
@@ -210,7 +210,7 @@ module AjaxfulRating # :nodoc:
 
     # Returns the name of the cache column for the passed dimension.
     def caching_column_name(dimension = nil)
-      name = options[:cache_column].to_s
+      name = ajaxful_rating_options[:cache_column].to_s
       name += "_#{dimension.to_s.underscore}" unless dimension.blank?
       name
     end

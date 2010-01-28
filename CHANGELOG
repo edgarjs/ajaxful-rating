@@ -1,5 +1,9 @@
-== 2.1.0 July 25, 2009
-* AjaxfulRating is now available as a gem
+== 2.1.5 January 28, 2010
+* Renamed options method name to avoid collapse.
+* Removed CSS duplication.
 
 == 2.1.4 January 25, 2010
 * Added option for showing current_user's rate instead of global average
+
+== 2.1.0 July 25, 2009
+* AjaxfulRating is now available as a gem
