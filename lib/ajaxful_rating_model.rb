@@ -10,8 +10,6 @@ module AjaxfulRating # :nodoc:
   end
 
   module ClassMethods
-    attr_reader :ajaxful_rating_options
-
     # Extends the model to be easy ajaxly rateable.
     #
     # Options:
@@ -26,18 +24,26 @@ module AjaxfulRating # :nodoc:
     def ajaxful_rateable(options = {})
       has_many :rates_without_dimension, :as => :rateable, :class_name => 'Rate',
         :dependent => :destroy, :conditions => {:dimension => nil}
-
+      has_many :raters_without_dimension, :through => :rates_without_dimension, :source => :rater
       
       options[:dimensions].each do |dimension|
         has_many "#{dimension}_rates", :dependent => :destroy,
           :conditions => {:dimension => dimension.to_s}, :class_name => 'Rate', :as => :rateable
+        has_many "#{dimension}_raters", :through => "#{dimension}_rates", :source => :rater
       end if options[:dimensions].is_a?(Array)
 
-      @ajaxful_rating_options = options.reverse_merge(
-        :stars => 5,
-        :allow_update => true,
-        :cache_column => :rating_average
-      )
+      class << self
+        def axr_config
+          @axr_config ||= {
+            :stars => 5,
+            :allow_update => true,
+            :cache_column => :rating_average
+          }
+        end
+      end
+      
+      axr_config.update(options)
+      
       include AjaxfulRating::InstanceMethods
       extend AjaxfulRating::SingletonMethods
     end
@@ -45,15 +51,6 @@ module AjaxfulRating # :nodoc:
     # Makes the association between user and Rate model.
     def ajaxful_rater(options = {})
       has_many :rates, options
-    end
-
-    # Maximum value accepted when rating the model. Default is 5.
-    #
-    # Change it by passing the :stars option to +ajaxful_rateable+
-    #
-    #   ajaxful_rateable :stars => 10
-    def max_rate_value
-      ajaxful_rating_options[:stars]
     end
   end
 
@@ -71,33 +68,40 @@ module AjaxfulRating # :nodoc:
     #   end
     def rate(stars, user, dimension = nil)
       return false if (stars.to_i > self.class.max_rate_value)
-      raise AlreadyRatedError if (!self.class.ajaxful_rating_options[:allow_update] && rated_by?(user, dimension))
+      raise AlreadyRatedError if (!self.class.axr_config[:allow_update] && rated_by?(user, dimension))
 
-      rate = (self.class.ajaxful_rating_options[:allow_update] && rated_by?(user, dimension)) ?
-        rate_by(user, dimension) : rates(dimension).build
-      rate.stars = stars
-      if user.respond_to?(:rates)
-        user.rates << rate
+      rate = if self.class.axr_config[:allow_update] && rated_by?(user, dimension)
+        rate_by(user, dimension)
       else
-        rate.send "#{self.class.user_class_name}_id=", user.id
-      end if rate.new_record?
+        returning rates(dimension).build do |r|
+          r.rater = user
+        end
+      end
+      rate.stars = stars
       rate.save!
       self.update_cached_average(dimension)
     end
 
-    # Returns an array with all users that have rated this object.
-    def raters
-      eval(self.class.user_class_name.classify).find_by_sql(
-        ["SELECT DISTINCT u.* FROM #{self.class.user_class_name.pluralize} u INNER JOIN rates r ON " +
-            "u.[id] = r.[#{self.class.user_class_name}_id] WHERE r.[rateable_id] = ? AND r.[rateable_type] = ?",
-          id, self.class.name]
-      )
+    # Returns an array with the users that have rated this object for the
+    # passed dimension.
+    #
+    # It may works as an alias for +dimension_raters+ methods.
+    def raters(dimension = nil)
+      sql = "SELECT DISTINCT u.* FROM #{self.class.user_class.table_name} u "\
+        "INNER JOIN rates r ON u.id = r.rater_id WHERE "
+      
+      sql << self.class.send(:sanitize_sql_for_conditions, {
+        :rateable_id => id,
+        :rateable_type => self.class.base_class.name,
+        :dimension => (dimension.to_s if dimension)
+      }, 'r')
+      
+      self.class.user_class.find_by_sql(sql)
     end
 
     # Finds the rate made by the user if he/she has already voted.
     def rate_by(user, dimension = nil)
-      filter = "find_by_#{self.class.user_class_name}_id"
-      rates(dimension).send filter, user
+      rates(dimension).find_by_rater_id(user)
     end
 
     # Return true if the user has rated the object, otherwise false
@@ -147,30 +151,40 @@ module AjaxfulRating # :nodoc:
     # Updates the cached average column in the rateable model.
     def update_cached_average(dimension = nil)
       if self.class.caching_average?(dimension)
-        rates(:refresh).size if self.respond_to?(:rates_count)
         update_attribute caching_column_name(dimension), self.rate_average(false, dimension)
       end
     end
   end
 
   module SingletonMethods
+    
+    # Maximum value accepted when rating the model. Default is 5.
+    #
+    # Change it by passing the :stars option to +ajaxful_rateable+
+    #
+    #   ajaxful_rateable :stars => 10
+    def max_rate_value
+      axr_config[:stars]
+    end
 
     # Name of the class for the user model.
     def user_class_name
-      @@user_class_name ||= Rate.column_names.find do |c|
-        u = c.scan(/(\w+)_id$/).flatten.first
-        break u if u && u != 'rateable'
-      end
+      Rate.reflect_on_association(:rater).options[:class_name]
+    end
+    
+    # Gets the user's class
+    def user_class
+      user_class_name.constantize
     end
 
     # Finds all rateable objects rated by the +user+.
-    def find_rated_by(user)
-      find_statement(:user_id, user.id)
+    def find_rated_by(user, dimension = nil)
+      find_statement(:rater_id, user.id, dimension)
     end
 
     # Finds all rateable objects rated with +stars+.
-    def find_rated_with(stars)
-      find_statement(:stars, stars)
+    def find_rated_with(stars, dimension = nil)
+      find_statement(:stars, stars, dimension)
     end
 
     # Finds the rateable object with the highest rate average.
@@ -184,12 +198,16 @@ module AjaxfulRating # :nodoc:
     end
 
     # Finds rateable objects by Rate's attribute.
-    def find_statement(attr_name, attr_value)
-      rateable = self.base_class.name
-      sql = sanitize_sql(["SELECT DISTINCT r2.* FROM rates r1 INNER JOIN " +
-            "#{rateable.constantize.table_name} r2 ON r1.rateable_id = r2.id " +
-            "WHERE (r1.[rateable_type] = ? AND r1.[#{attr_name}] = ?)",
-          rateable, attr_value])
+    def find_statement(attr_name, attr_value, dimension = nil)
+      sql = "SELECT DISTINCT r2.* FROM rates r1 INNER JOIN "\
+        "#{self.base_class.table_name} r2 ON r1.rateable_id = r2.id WHERE "
+      
+      sql << sanitize_sql_for_conditions({
+        :rateable_type => self.base_class.name,
+        attr_name => attr_value,
+        :dimension => (dimension.to_s if dimension)
+      }, 'r1')
+      
       find_by_sql(sql)
     end
 
@@ -210,7 +228,7 @@ module AjaxfulRating # :nodoc:
 
     # Returns the name of the cache column for the passed dimension.
     def caching_column_name(dimension = nil)
-      name = ajaxful_rating_options[:cache_column].to_s
+      name = axr_config[:cache_column].to_s
       name += "_#{dimension.to_s.underscore}" unless dimension.blank?
       name
     end
