@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{ajaxful_rating}
-  s.version = "2.2.0"
+  s.version = "2.2.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Edgar J. Suarez"]
-  s.date = %q{2010-03-07}
+  s.date = %q{2010-03-08}
   s.description = %q{Provides a simple way to add rating functionality to your application.}
   s.email = %q{edgar.js@gmail.com}
   s.extra_rdoc_files = ["CHANGELOG", "README.textile", "lib/ajaxful_rating.rb", "lib/axr/css_builder.rb", "lib/axr/errors.rb", "lib/axr/helpers.rb", "lib/axr/locale.rb", "lib/axr/model.rb", "lib/axr/stars_builder.rb"]

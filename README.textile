@@ -19,17 +19,13 @@ h2. Instructions
 
 h3. Install
 
-To install the plugin:
+To install the gem run the next command:
 
-  @script/plugin install git://github.com/edgarjs/ajaxful-rating.git@
-
-Or the gem
-
-  @sudo gem install edgarjs-ajaxful_rating --source=http://gems.github.com@
+  @gem install ajaxful_rating@
   
 You can configure it in your environment.rb file also:
 
-  @config.gem "edgarjs-ajaxful_rating", :lib => "ajaxful_rating", :source => "http://gems.github.com"@
+  @config.gem "ajaxful_rating"@
 
 h3. Generate
 
@@ -141,8 +137,8 @@ example (if you added the @rate@ route):
     @car = Car.find(params[:id])
     @car.rate(params[:stars], current_user, params[:dimension])
     render :update do |page|
-      page.replace_html @car.wrapper_dom_id(params[:dimension]), ratings_for(@car, params.merge(:wrap => false))
-      page.visual_effect :highlight, @car.wrapper_dom_id(params[:dimension])
+      page.replace_html @car.wrapper_dom_id(params), ratings_for(@car, params.merge(:wrap => false))
+      page.visual_effect :highlight, @car.wrapper_dom_id(params)
     end
   end
 </pre>

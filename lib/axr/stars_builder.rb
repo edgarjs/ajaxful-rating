@@ -12,7 +12,7 @@ module AjaxfulRating # :nodoc:
     
     def show_value
       if options[:show_user_rating]
-        rate = rateable.rate_by(user, options[:dimension])
+        rate = rateable.rate_by(user, options[:dimension]) if user
         rate ? rate.stars : 0
       else
         rateable.rate_average(true, options[:dimension])
@@ -29,7 +29,8 @@ module AjaxfulRating # :nodoc:
       @options = {
         :wrap => true,
         :small => false,
-        :show_user_rating => false
+        :show_user_rating => false,
+        :force_static => false
       }.merge(options)
       
       @options[:small] = @options[:small].to_s == 'true'
@@ -60,7 +61,7 @@ module AjaxfulRating # :nodoc:
       @css_builder.rule('.ajaxful-rating.small',
         :width => (rateable.class.max_stars * 10)) if options[:small]
       
-      stars << @template.content_tag(:li, i18n, :class => "show-value",
+      stars << @template.content_tag(:li, i18n(:current), :class => "show-value",
         :style => "width: #{width}%")
       stars += (1..rateable.class.max_stars).map do |i|
         star_tag(i)
@@ -77,10 +78,10 @@ module AjaxfulRating # :nodoc:
       })
       
       @template.content_tag(:li) do
-        if user && (!already_rated || rateable.axr_config[:allow_update])
+        if !options[:force_static] && (user && (!already_rated || rateable.axr_config[:allow_update]))
           link_star_tag(value, css_class)
         else
-          @template.content_tag(:span, show_value, :class => css_class, :title => i18n)
+          @template.content_tag(:span, show_value, :class => css_class, :title => i18n(:current))
         end
       end
     end
@@ -95,7 +96,7 @@ module AjaxfulRating # :nodoc:
       config = {
         :html => {
           :class => css_class,
-          :title => i18n(false)
+          :title => i18n(:hover, value)
         },
         :url => "#{remote_options[:url]}",
         :with => "'#{query}'"
@@ -105,7 +106,7 @@ module AjaxfulRating # :nodoc:
     
     def wrapper_tag
       @template.content_tag(:div, ratings_tag, :class => "ajaxful-rating-wrapper",
-        :id => rateable.wrapper_dom_id(options[:dimension]))
+        :id => rateable.wrapper_dom_id(options))
     end
   end
 end

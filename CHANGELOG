@@ -1,3 +1,9 @@
+== 2.2.1 March 8, 2010
+* Changed :force_dynamic for its opposite :force_static.
+* Fixed I18n texts.
+* Fixed missed quotes for Rate belongs_to association with User class
+* Detailed wrapper DOM id with passed hash.
+
 == 2.2.0 March 7, 2010
 * Improved model methods and options.
 * Works now with inherited models.

@@ -19,6 +19,7 @@ module AjaxfulRating # :nodoc:
     # * <tt>:wrap</tt> Whether the star list is wrapped within a div tag or not. This is useful when page updating. Default is true.
     # * <tt>:show_user_rating</tt> Set to true if you want to display only the current user's rating, instead of the global average.
     # * <tt>:dimension</tt> The dimension to show the ratings for.
+    # * <tt>:force_static</tt> Force static stars even when you're passing a user instance.
     # 
     # Example:
     #   <%= ratings_for @article, :wrap => false %> # => Will produce something like:
@@ -68,12 +69,13 @@ module AjaxfulRating # :nodoc:
     # 
     #   ajaxful_rating:
     #     helper:
-    #       global_average: "Current rating average: {{value}} out of {{max}}"
+    #       global_average: "Global rating average: {{value}} out of {{max}}"
     #       user_rating: "Your rating: {{value}} out of {{max}}"
+    #       hover: "Rate {{value}} out of {{max}}"    def ratings_for(*args)
     def ratings_for(*args)
       @axr_css ||= CSSBuilder.new
       options = args.extract_options!.symbolize_keys.slice(:small, :remote_options,
-        :wrap, :show_user_rating, :dimension)
+        :wrap, :show_user_rating, :dimension, :force_static)
       remote_options = options.delete(:remote_options) || {}
       rateable = args.shift
       user = args.shift || (respond_to?(:current_user) ? current_user : raise(NoUserSpecified))
