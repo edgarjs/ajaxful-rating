@@ -13,6 +13,8 @@ h2. Demo
 You can find a demo working app for this plugin at "http://github.com/edgarjs/ajaxful-rating_demo_app":http://github.com/edgarjs/ajaxful-rating_demo_app
 Just migrate and run...
 
+Or view it live: "http://axr.heroku.com":http://axr.heroku.com
+
 *******************************************************************
 
 h2. Instructions
