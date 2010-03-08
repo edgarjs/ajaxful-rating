@@ -34,7 +34,7 @@ You can configure it in your environment.rb file also:
 h3. Generate
 
   @script/generate ajaxful_rating UserModelName@
-	
+  
 The generator takes one argument: UserModelName, which is the name of your *current*
 user model. This is necessary to link both the rate and user models.
 
@@ -132,20 +132,19 @@ required CSS style for the list. Also don't forget to include the javascripts.*
   <%= javascript_include_tag :defaults %>
   <%= ajaxful_rating_style %>
 </pre>
-		
+    
 When a user submits a rating it will call the action in your controller, for
 example (if you added the @rate@ route):
 
 <pre>
-def rate
-  @article = Article.find(params[:id])
-  @article.rate(params[:stars], current_user, params[:dimension])
-  id = "ajaxful-rating-#{!params[:dimension].blank? ? "#{params[:dimension]}-" : ''}article-#{@article.id}"
-  render :update do |page|
-    page.replace_html id, ratings_for(@article, :wrap => false, :dimension => params[:dimension])
-    page.visual_effect :highlight, id
+  def rate
+    @car = Car.find(params[:id])
+    @car.rate(params[:stars], current_user, params[:dimension])
+    render :update do |page|
+      page.replace_html @car.wrapper_dom_id(params[:dimension]), ratings_for(@car, params.merge(:wrap => false))
+      page.visual_effect :highlight, @car.wrapper_dom_id(params[:dimension])
+    end
   end
-end
 </pre>
 
 There are some more options for this helper, please see the rdoc for details.

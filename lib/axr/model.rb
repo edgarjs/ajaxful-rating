@@ -1,9 +1,5 @@
 module AjaxfulRating # :nodoc:
-  class AlreadyRatedError < StandardError
-    def to_s
-      "Model has already been rated by this user. To allow update of ratings pass :allow_update => true to the ajaxful_rateable call."
-    end
-  end
+  include AjaxfulRating::Errors
 
   def self.included(base)
     base.extend ClassMethods
@@ -40,6 +36,8 @@ module AjaxfulRating # :nodoc:
             :cache_column => :rating_average
           }
         end
+        
+        alias_method :ajaxful_rating_options, :axr_config
       end
       
       axr_config.update(options)
@@ -56,6 +54,11 @@ module AjaxfulRating # :nodoc:
 
   # Instance methods for the rateable object.
   module InstanceMethods
+    
+    # Proxy for axr_config singleton method.
+    def axr_config
+      self.class.axr_config
+    end
 
     # Submits a new rate. Accepts a hash of tipical Ajax request.
     #
@@ -67,7 +70,7 @@ module AjaxfulRating # :nodoc:
     #     # some page update here ...
     #   end
     def rate(stars, user, dimension = nil)
-      return false if (stars.to_i > self.class.max_rate_value)
+      return false if (stars.to_i > self.class.max_stars)
       raise AlreadyRatedError if (!self.class.axr_config[:allow_update] && rated_by?(user, dimension))
 
       rate = if self.class.axr_config[:allow_update] && rated_by?(user, dimension)
@@ -80,6 +83,13 @@ module AjaxfulRating # :nodoc:
       rate.stars = stars
       rate.save!
       self.update_cached_average(dimension)
+    end
+    
+    # Builds the DOM id attribute for the wrapper in view.
+    def wrapper_dom_id(dimension = nil)
+      prefix = "ajaxful_rating"
+      prefix << "_#{dimension}" unless dimension.blank?
+      ApplicationController.helpers.dom_id(self, prefix)
     end
 
     # Returns an array with the users that have rated this object for the
@@ -101,12 +111,19 @@ module AjaxfulRating # :nodoc:
 
     # Finds the rate made by the user if he/she has already voted.
     def rate_by(user, dimension = nil)
-      rates(dimension).find_by_rater_id(user)
+      rates(dimension).find_by_rater_id(user.id)
     end
 
     # Return true if the user has rated the object, otherwise false
     def rated_by?(user, dimension = nil)
       !rate_by(user, dimension).nil?
+    end
+    
+    # Returns whether or not the user can rate this object.
+    # Based on if the user has already rated the object or the
+    # :allow_update option is enabled.
+    def can_rate_by?(user, dimension = nil)
+      !rated_by?(user, dimension) || self.class.axr_config[:allow_update]
     end
 
     # Instance's total rates.
@@ -163,7 +180,7 @@ module AjaxfulRating # :nodoc:
     # Change it by passing the :stars option to +ajaxful_rateable+
     #
     #   ajaxful_rateable :stars => 10
-    def max_rate_value
+    def max_stars
       axr_config[:stars]
     end
 

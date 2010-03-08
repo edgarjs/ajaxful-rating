@@ -1,3 +1,14 @@
+== 2.2.0 March 7, 2010
+* Improved model methods and options.
+* Works now with inherited models.
+* Removed HTML and CSS options for helper for sake of simpleness.
+* Renamed helper option :small_stars to :small.
+* Changed whole helper approach. It should work the same as before.
+  (Except for the renamed and removed options)
+* Removed :force_dynamic, you should exclude the helper from cache since it uses
+  authorization.
+* Fixed opened bugs so far.
+
 == 2.1.5 January 28, 2010
 * Renamed options method name to avoid collapse.
 * Removed CSS duplication.
