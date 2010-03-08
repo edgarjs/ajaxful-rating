@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{ajaxful_rating}
-  s.version = "2.2.1"
+  s.version = "2.2.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Edgar J. Suarez"]
