@@ -67,11 +67,9 @@ module AjaxfulRating # :nodoc:
     # string by setting these keys on your translation hash:
     # 
     #   ajaxful_rating:
-    #     stars:
-    #       current_average: "Current rating: {{average}}/{{max}}"
-    #       title:
-    #         one: 1 star out of {{total}}
-    #         other: "{{count}} stars out of {{total}}"
+    #     helper:
+    #       global_average: "Current rating average: {{value}} out of {{max}}"
+    #       user_rating: "Your rating: {{value}} out of {{max}}"
     def ratings_for(*args)
       @axr_css ||= CSSBuilder.new
       options = args.extract_options!.symbolize_keys.slice(:small, :remote_options,
