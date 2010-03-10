@@ -1,3 +1,7 @@
+== 2.2.2 March 9, 2010
+* Fix bug for jRuby
+* Fixed user self relational model to be rater and rateable.
+
 == 2.2.1 March 8, 2010
 * Changed :force_dynamic for its opposite :force_static.
 * Fixed I18n texts.

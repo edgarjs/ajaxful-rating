@@ -48,7 +48,7 @@ module AjaxfulRating # :nodoc:
 
     # Makes the association between user and Rate model.
     def ajaxful_rater(options = {})
-      has_many :rates, options
+      has_many :ratings_given, options.merge(:class_name => "Rate", :foreign_key => :rater_id)
     end
   end
 
@@ -90,13 +90,13 @@ module AjaxfulRating # :nodoc:
       options = options.symbolize_keys.slice(:small, :dimension)
       options = options.map do |k, v|
         if k == :dimension
-          v
+          v.to_s
         else
           v.to_s == 'true' ? k.to_s : "no-#{k}"
         end
       end
       prefix = "ajaxful_rating"
-      prefix << "_#{options.join('_')}" unless options.empty?
+      prefix << "_#{options.sort.join('_')}" unless options.empty?
       ApplicationController.helpers.dom_id(self, prefix)
     end
 
