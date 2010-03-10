@@ -2,7 +2,6 @@ CHANGELOG
 Manifest
 README.textile
 Rakefile
-ajaxful_rating.gemspec
 generators/ajaxful_rating/USAGE
 generators/ajaxful_rating/ajaxful_rating_generator.rb
 generators/ajaxful_rating/templates/images/star.png
