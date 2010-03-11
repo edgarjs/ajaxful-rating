@@ -1,0 +1,84 @@
+/*
+* Style by Rogie http://www.komodomedia.com/blog/2007/01/css-star-rating-redux/
+*/
+
+.ajaxful-rating,
+.ajaxful-rating a:hover,
+.ajaxful-rating a:active,
+.ajaxful-rating a:focus,
+.ajaxful-rating .show-value{
+    background: url(/images/ajaxful_rating/star.png) left -1000px repeat-x;
+}
+.ajaxful-rating{
+    position: relative;
+    /*width: 125px; this is setted dynamically */
+    height: 25px;
+    overflow: hidden;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background-position: left top;
+}
+.ajaxful-rating li{ display: inline; }
+.ajaxful-rating a,
+.ajaxful-rating span,
+.ajaxful-rating .show-value{
+    position: absolute;
+    top: 0;
+    left: 0;
+    text-indent: -1000em;
+    height: 25px;
+    line-height: 25px;
+    outline: none;
+    overflow: hidden;
+    border: none;
+}
+.ajaxful-rating a:hover,
+.ajaxful-rating a:active,
+.ajaxful-rating a:focus{
+    background-position: left bottom;
+}
+
+/* This section is generated dynamically.
+Just add a call to the helper method 'ajaxful_rating_style' within
+the head tags in your main layout 
+.ajaxful-rating .stars-1{
+width: 20%;
+z-index: 6;
+}
+.ajaxful-rating .stars-2{
+width: 40%;
+z-index: 5;
+}
+.ajaxful-rating .stars-3{
+width: 60%;
+z-index: 4;
+}
+.ajaxful-rating .stars-4{
+width: 80%;
+z-index: 3;
+}
+.ajaxful-rating .stars-5{
+width: 100%;
+z-index: 2;
+}
+*/
+.ajaxful-rating .show-value{
+    z-index: 1;
+    background-position: left center;
+}
+
+/* smaller star */
+.ajaxful-rating.small{
+    /*width: 50px; this is setted dynamically */
+    height: 10px;
+}
+.ajaxful-rating.small,
+.ajaxful-rating.small a:hover,
+.ajaxful-rating.small a:active,
+.ajaxful-rating.small a:focus,
+.ajaxful-rating.small .show-value{
+    background-image: url(/images/ajaxful_rating/star_small.png);
+    line-height: 10px;
+    height: 10px;
+}
