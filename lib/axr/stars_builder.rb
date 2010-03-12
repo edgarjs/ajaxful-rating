@@ -67,7 +67,7 @@ module AjaxfulRating # :nodoc:
       stars += (1..rateable.class.max_stars).map do |i|
         star_tag(i)
       end
-      @template.content_tag(:ul, stars.join, :class => "ajaxful-rating#{' small' if options[:small]}")
+      @template.content_tag(:ul, stars.join.html_safe, :class => "ajaxful-rating#{' small' if options[:small]}")
     end
     
     def star_tag(value)
