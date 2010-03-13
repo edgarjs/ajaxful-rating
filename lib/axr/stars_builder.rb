@@ -49,7 +49,7 @@ module AjaxfulRating # :nodoc:
         if @template.respond_to?(url)
           @remote_options[:url] = @template.send(url, rateable)
         else
-          raise(MissingRateRoute)
+          raise(Errors::MissingRateRoute)
         end
       end
     end
