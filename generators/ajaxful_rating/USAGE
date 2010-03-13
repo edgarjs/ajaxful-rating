@@ -1,5 +1,0 @@
-Description:
-    Generates a model called Rate linked to a user model named as the passed parameter.
-
-Example:
-    ./script/generate ajaxful_rating User
