@@ -94,17 +94,17 @@ module AjaxfulRating # :nodoc:
         :small => options[:small],
         :show_user_rating => options[:show_user_rating]
       }.to_query
-      config = {
-        :url => "#{remote_options[:url]}?#{query}"
-      }
-      html_options = {
+      
+      options = {
         :class => css_class,
         :title => i18n(:hover, value),
-        :method => :post,
+        :method => remote_options[:method] || :post,
         :remote => true
       }
+      
+      href = "#{remote_options[:url]}?#{query}"
 
-      @template.link_to(value, remote_options.merge(config), html_options)
+      @template.link_to(value, href, options)
     end
 
     def wrapper_tag
