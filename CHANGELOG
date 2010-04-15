@@ -1,3 +1,6 @@
+== 2.2.4 April 15, 2010
+* Fix wrapper_dom_id join options
+
 == 2.2.3 March 10, 2010
 * Fix validation of current_user to show linked stars
 

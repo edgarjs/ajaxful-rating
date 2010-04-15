@@ -95,9 +95,8 @@ module AjaxfulRating # :nodoc:
           v.to_s == 'true' ? k.to_s : "no-#{k}"
         end
       end
-      prefix = "ajaxful_rating"
-      prefix << "_#{options.sort.join('_')}" unless options.empty?
-      ApplicationController.helpers.dom_id(self, prefix)
+      options.unshift("ajaxful_rating")
+      ApplicationController.helpers.dom_id(self, options.sort.join('_'))
     end
 
     # Returns an array with the users that have rated this object for the
