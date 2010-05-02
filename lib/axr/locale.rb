@@ -12,7 +12,8 @@ module AjaxfulRating # :nodoc:
     DEFAULTS = {
       :user_rating => "Your rating: {{value}} out of {{max}}",
       :global_average => "Global rating average: {{value}} out of {{max}}",
-      :hover => "Rate {{value}} out of {{max}}"
+      :hover => "Rate {{value}} out of {{max}}",
+      :no_ratings => "Not yet rated"
     }
     
     def i18n(key, value = nil)
@@ -21,6 +22,7 @@ module AjaxfulRating # :nodoc:
       else
         key.to_sym
       end
+      key = :no_ratings if key == :user_rating && options[:show_user_rating] && ((value || show_value) == 0)
       default = DEFAULTS[key]
       key = "ajaxful_rating.helper.#{key}"
       I18n.t(key, :value => (value || show_value),
