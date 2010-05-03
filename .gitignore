@@ -1,4 +1,4 @@
 pkg
 doc
 .DS_Store
-ajaxful_rating*.gem
+*.gem

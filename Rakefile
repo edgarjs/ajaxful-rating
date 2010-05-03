@@ -1,14 +1,21 @@
 require 'rubygems'
 require 'rake'
-require 'echoe'
 
-Echoe.new('ajaxful_rating', '2.2.3') do |p|
-  p.description    = "Provides a simple way to add rating functionality to your application."
-  p.url            = "http://github.com/edgarjs/ajaxful-rating"
-  p.author         = "Edgar J. Suarez"
-  p.email          = "edgar.js@gmail.com"
-  p.ignore_pattern = ["tmp/*", "script/*"]
-  p.development_dependencies = []
+begin
+  require 'jeweler'
+  
+  Jeweler::Tasks.new do |spec|
+    spec.name                   = "ajaxful_rating"
+    spec.version                = "3.0.0.beta1"
+    spec.summary                = "Provides a simple way to add rating functionality to your application."
+    spec.description            = "Provides a simple way to add rating functionality to your application."
+    spec.homepage               = "http://github.com/edgarjs/ajaxful-rating"
+    spec.authors                = ["Edgar J. Suarez", "Denis Odorcic"]
+    spec.email                  = ["edgar.js@gmail.com", "denis.odorcic@gmail.com"]
+    spec.has_rdoc               = true
+    spec.files.exclude          'init.rb'
+  end
+  
+rescue LoadError
+  puts "Jeweler not available. Install it with: gem install jeweler"
 end
-
-Dir["#{File.dirname(__FILE__)}/tasks/*.rake"].sort.each { |ext| load ext }
