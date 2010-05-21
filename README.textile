@@ -64,8 +64,7 @@ class Car < ActiveRecord::Base
 end
 </pre>
 
-Then you need to add a call @ajaxful_rater@ in the user model. This includes a simple line so
-you can add it _by your own_ as well (@has_many :rates@).
+Then you need to add a call @ajaxful_rater@ in the user model to make your @User@ model able to rate objects.
 
 <pre>
 class User < ActiveRecord::Base
@@ -122,8 +121,12 @@ correct action in your controller:
 <%= ratings_for @article, :remote_options => {:url => your_rate_path(@article)} %>
 </pre>
 
+h3. Important!
+
 *To display the stars properly you need to add a call in the head of your layout, which will generate the
 required CSS style for the list. Also don't forget to include the javascripts.*
+
+It's also important to note that this call MUST be within your head tags in your layout, as for now it seems to doesn't work with the @content_for@ tag.
 
 <pre>
   #within the head tags of your layout...
