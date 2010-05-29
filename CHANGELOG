@@ -1,3 +1,6 @@
+== 2.2.6 May 27, 2010
+* Fix wrapper_dom_id with false values for keys
+
 == 2.2.5 May 21, 2010
 * Fix wrapper_dom_id with empty values
 
