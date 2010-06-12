@@ -20,7 +20,8 @@ module AjaxfulRating # :nodoc:
     end
     
     def render
-      options[:wrap] ? wrapper_tag : ratings_tag
+      # When using rails_xss plugin, it needs to render as HTML
+      (options[:wrap] ? wrapper_tag : ratings_tag).try(:html_safe)
     end
     
     private

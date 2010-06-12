@@ -1,3 +1,6 @@
+== 2.2.7 Jun 12, 2010
+* Fix generated html marking it as html_safe when using rails_xss plugin
+
 == 2.2.6 May 27, 2010
 * Fix wrapper_dom_id with false values for keys
 
