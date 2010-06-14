@@ -20,8 +20,7 @@ module AjaxfulRating # :nodoc:
     end
     
     def render
-      # When using rails_xss plugin, it needs to render as HTML
-      (options[:wrap] ? wrapper_tag : ratings_tag).try(:html_safe)
+      options[:wrap] ? wrapper_tag : ratings_tag
     end
     
     private
@@ -68,7 +67,8 @@ module AjaxfulRating # :nodoc:
       stars += (1..rateable.class.max_stars).map do |i|
         star_tag(i)
       end
-      @template.content_tag(:ul, stars.join, :class => "ajaxful-rating#{' small' if options[:small]}")
+      # When using rails_xss plugin, it needs to render as HTML
+      @template.content_tag(:ul, stars.join.try(:html_safe), :class => "ajaxful-rating#{' small' if options[:small]}")
     end
     
     def star_tag(value)
