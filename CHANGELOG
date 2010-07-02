@@ -1,3 +1,6 @@
+== 2.2.8.1 Jul 02, 2010
+* Call html_safe only when it's available.
+
 == 2.2.8 Jun 14, 2010
 * Fix html for <li> marking it as html_safe when using rails_xss plugin
 
