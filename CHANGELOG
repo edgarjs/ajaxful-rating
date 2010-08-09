@@ -1,3 +1,6 @@
+== 3.0.0.beta2 August 8, 2010
+* Fix dom_class and tap methods in rails.rc
+
 == 2.2.3 March 10, 2010
 * Fix validation of current_user to show linked stars
 
