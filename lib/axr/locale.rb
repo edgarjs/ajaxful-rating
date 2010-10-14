@@ -4,15 +4,15 @@ module AjaxfulRating # :nodoc:
   #
   #   ajaxful_rating:
   #     helper:
-  #       global_average: "Global rating average: {{value}} out of {{max}}"
-  #       user_rating: "Your rating: {{value}} out of {{max}}"
-  #       hover: "Rate {{value}} out of {{max}}"
+  #       global_average: "Global rating average: %{value} out of %{max}"
+  #       user_rating: "Your rating: %{value} out of %{max}"
+  #       hover: "Rate %{value} out of %{max}"
   module Locale
     
     DEFAULTS = {
-      :user_rating => "Your rating: {{value}} out of {{max}}",
-      :global_average => "Global rating average: {{value}} out of {{max}}",
-      :hover => "Rate {{value}} out of {{max}}"
+      :user_rating => "Your rating: %{value} out of %{max}",
+      :global_average => "Global rating average: %{value} out of %{max}",
+      :hover => "Rate %{value} out of %{max}"
     }
     
     def i18n(key, value = nil)

@@ -69,9 +69,9 @@ module AjaxfulRating # :nodoc:
     # 
     #   ajaxful_rating:
     #     helper:
-    #       global_average: "Global rating average: {{value}} out of {{max}}"
-    #       user_rating: "Your rating: {{value}} out of {{max}}"
-    #       hover: "Rate {{value}} out of {{max}}"    def ratings_for(*args)
+    #       global_average: "Global rating average: %{value} out of %{max}"
+    #       user_rating: "Your rating: %{value} out of %{max}"
+    #       hover: "Rate %{value} out of %{max}"    def ratings_for(*args)
     def ratings_for(*args)
       @axr_css ||= CSSBuilder.new
       options = args.extract_options!.to_hash.symbolize_keys.slice(:small, :remote_options,
