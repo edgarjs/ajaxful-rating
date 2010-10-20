@@ -30,6 +30,7 @@ module AjaxfulRating # :nodoc:
         :wrap => true,
         :small => false,
         :show_user_rating => false,
+        :disable_remote => false,
         :force_static => false,
         :current_user => (@template.current_user if @template.respond_to?(:current_user))
       }.merge(options)
@@ -104,7 +105,12 @@ module AjaxfulRating # :nodoc:
         :url => "#{remote_options[:url]}",
         :with => "'#{query}'"
       }
-      @template.link_to_remote(value, remote_options.merge(config))
+      if options[:disable_remote]
+        config[:url] += "?" + query
+        @template.link_to(value, config[:url], config[:html])
+      else
+        @template.link_to_remote(value, remote_options.merge(config))
+      end
     end
     
     def wrapper_tag
