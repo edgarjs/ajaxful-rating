@@ -153,10 +153,13 @@ module AjaxfulRating # :nodoc:
         send(caching_column_name(dimension, to_nearest)).to_f
       else
         avg = self.rates_sum(dimension).to_f / self.total_rates(dimension).to_f
-        to_nearest ||=  axr_config[:to_nearest]
-        if to_nearest
-          notches = 1/to_nearest.to_f
-          avg = ((avg * notches).round)/notches
+        avg.nan? ? 0.0 : avg
+        if avg > 0
+          to_nearest ||=  axr_config[:to_nearest]
+          if to_nearest
+            notches = 1/to_nearest.to_f
+            avg = ((avg * notches).round)/notches
+          end
         end
         avg
       end
