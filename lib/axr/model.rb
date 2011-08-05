@@ -12,6 +12,8 @@ module AjaxfulRating # :nodoc:
     # * <tt>:stars</tt> Max number of stars that can be submitted.
     # * <tt>:allow_update</tt> Set to true if you want users to be able to update their votes.
     # * <tt>:cache_column</tt> Name of the column for storing the cached rating average.
+    # * <tt>:cache_column</tt> Name of the column for storing the cached rating average.
+    # * <tt>:to_nearest</tt> Force average to be to the nearest whatever. eg. 0.5 for the nearest half-star. May be overridden in the ratings_for
     #
     # Example:
     #   class Article < ActiveRecord::Base
@@ -146,11 +148,17 @@ module AjaxfulRating # :nodoc:
     # Rating average for the object.
     #
     # Pass false as param to force the calculation if you are caching it.
-    def rate_average(cached = true, dimension = nil)
-      avg = if cached && self.class.caching_average?(dimension)
-        send(caching_column_name(dimension)).to_f
+    def rate_average(cached = true, dimension = nil, to_nearest = nil)
+      avg = if cached && self.class.caching_average?(dimension, to_nearest)
+        send(caching_column_name(dimension, to_nearest)).to_f
       else
-        self.rates_sum(dimension).to_f / self.total_rates(dimension).to_f
+        avg = self.rates_sum(dimension).to_f / self.total_rates(dimension).to_f
+        to_nearest ||=  axr_config[:to_nearest]
+        if to_nearest
+          notches = 1/to_nearest.to_f
+          avg = ((avg * notches).round)/notches
+        end
+        avg
       end
       avg.nan? ? 0.0 : avg
     end
@@ -168,14 +176,14 @@ module AjaxfulRating # :nodoc:
     end
 
     # Returns the name of the cache column for the passed dimension.
-    def caching_column_name(dimension = nil)
-      self.class.caching_column_name(dimension)
+    def caching_column_name(dimension = nil, to_nearest = nil)
+      self.class.caching_column_name(dimension, to_nearest)
     end
 
     # Updates the cached average column in the rateable model.
-    def update_cached_average(dimension = nil)
-      if self.class.caching_average?(dimension)
-        update_attribute caching_column_name(dimension), self.rate_average(false, dimension)
+    def update_cached_average(dimension = nil, to_nearest = nil)
+      if self.class.caching_average?(dimension, to_nearest)
+        update_attribute caching_column_name(dimension, to_nearest), self.rate_average(false, dimension, to_nearest)
       end
     end
   end
@@ -246,14 +254,15 @@ module AjaxfulRating # :nodoc:
     #
     #   ajaxful_rateable :cache_column => :my_custom_column
     #
-    def caching_average?(dimension = nil)
-      column_names.include?(caching_column_name(dimension))
+    def caching_average?(dimension = nil, to_nearest = nil)
+      column_names.include?(caching_column_name(dimension, to_nearest))
     end
 
     # Returns the name of the cache column for the passed dimension.
-    def caching_column_name(dimension = nil)
+    def caching_column_name(dimension = nil, to_nearest = nil)
       name = axr_config[:cache_column].to_s
       name += "_#{dimension.to_s.underscore}" unless dimension.blank?
+      name += "_#{to_nearest.to_s.gsub('.', '_').underscore}" unless to_nearest.blank?
       name
     end
   end

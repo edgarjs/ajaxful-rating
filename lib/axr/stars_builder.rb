@@ -38,7 +38,7 @@ module AjaxfulRating # :nodoc:
       @options[:small] = @options[:small].to_s == 'true'
       @options[:show_user_rating] = @options[:show_user_rating].to_s == 'true'
       @options[:wrap] = @options[:wrap].to_s == 'true'
-      
+     
       @remote_options = {
         :url => nil,
         :method => :post
