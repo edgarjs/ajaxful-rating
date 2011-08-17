@@ -79,7 +79,7 @@ module AjaxfulRating # :nodoc:
       })
 
       @template.content_tag(:li) do
-        if !options[:force_static] && (user && options[:current_user] == user && (!already_rated || rateable.axr_config[:allow_update]))
+        if !options[:force_static] && (user && options[:current_user] == user && (!already_rated || rateable.axr_config(options[:dimension])[:allow_update]))
           link_star_tag(value, css_class)
         else
           @template.content_tag(:span, show_value, :class => css_class, :title => i18n(:current))

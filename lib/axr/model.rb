@@ -21,16 +21,13 @@ module AjaxfulRating # :nodoc:
       has_many :rates_without_dimension, :as => :rateable, :class_name => 'Rate',
         :dependent => :destroy, :conditions => {:dimension => nil}
       has_many :raters_without_dimension, :through => :rates_without_dimension, :source => :rater
-      
-      options[:dimensions].each do |dimension|
-        has_many "#{dimension}_rates", :dependent => :destroy,
-          :conditions => {:dimension => dimension.to_s}, :class_name => 'Rate', :as => :rateable
-        has_many "#{dimension}_raters", :through => "#{dimension}_rates", :source => :rater
-      end if options[:dimensions].is_a?(Array)
 
       class << self
-        def axr_config
-          @axr_config ||= {
+        def axr_config(dimension = nil)
+          dimension ||= :default
+          @axr_config ||= {}
+          dimension = dimension.to_sym
+          @axr_config[dimension] ||= {
             :stars => 5,
             :allow_update => true,
             :cache_column => :rating_average
@@ -39,8 +36,19 @@ module AjaxfulRating # :nodoc:
         
         alias_method :ajaxful_rating_options, :axr_config
       end
+
+      if options[:dimensions].is_a?(Array)
+        options[:dimensions].each do |dimension|
+          has_many "#{dimension}_rates", :dependent => :destroy,
+            :conditions => {:dimension => dimension.to_s}, :class_name => 'Rate', :as => :rateable
+          has_many "#{dimension}_raters", :through => "#{dimension}_rates", :source => :rater
+
+          axr_config(dimension).update(options)
+        end 
+      else
+          axr_config.update(options)
+      end
       
-      axr_config.update(options)
       
       include AjaxfulRating::InstanceMethods
       extend AjaxfulRating::SingletonMethods
@@ -56,8 +64,8 @@ module AjaxfulRating # :nodoc:
   module InstanceMethods
     
     # Proxy for axr_config singleton method.
-    def axr_config
-      self.class.axr_config
+    def axr_config(dimension = nil)
+      self.class.axr_config(dimension)
     end
 
     # Submits a new rate. Accepts a hash of tipical Ajax request.
@@ -71,9 +79,9 @@ module AjaxfulRating # :nodoc:
     #   end
     def rate(stars, user, dimension = nil)
       return false if (stars.to_i > self.class.max_stars)
-      raise Errors::AlreadyRatedError if (!self.class.axr_config[:allow_update] && rated_by?(user, dimension))
+      raise Errors::AlreadyRatedError if (!self.class.axr_config(dimension)[:allow_update] && rated_by?(user, dimension))
 
-      rate = if self.class.axr_config[:allow_update] && rated_by?(user, dimension)
+      rate = if self.class.axr_config(dimension)[:allow_update] && rated_by?(user, dimension)
         rate_by(user, dimension)
       else
         rates(dimension).build.tap do |r|
@@ -132,7 +140,7 @@ module AjaxfulRating # :nodoc:
     # Based on if the user has already rated the object or the
     # :allow_update option is enabled.
     def can_rate_by?(user, dimension = nil)
-      !rated_by?(user, dimension) || self.class.axr_config[:allow_update]
+      !rated_by?(user, dimension) || self.class.axr_config(dimension)[:allow_update]
     end
 
     # Instance's total rates.
@@ -189,8 +197,8 @@ module AjaxfulRating # :nodoc:
     # Change it by passing the :stars option to +ajaxful_rateable+
     #
     #   ajaxful_rateable :stars => 10
-    def max_stars
-      axr_config[:stars]
+    def max_stars(dimension = nil)
+      axr_config(dimension)[:stars]
     end
 
     # Name of the class for the user model.
@@ -254,7 +262,7 @@ module AjaxfulRating # :nodoc:
 
     # Returns the name of the cache column for the passed dimension.
     def caching_column_name(dimension = nil)
-      name = axr_config[:cache_column].to_s
+      name = axr_config(dimension)[:cache_column].to_s
       name += "_#{dimension.to_s.underscore}" unless dimension.blank?
       name
     end
