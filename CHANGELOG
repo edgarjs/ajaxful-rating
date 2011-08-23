@@ -1,3 +1,6 @@
+== 3.0.0.beta6 August 23, 2011
+* Move validation to Rate model
+
 == 3.0.0.beta5 August 23, 2011
 * Validate minimum of stars
 
