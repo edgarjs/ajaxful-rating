@@ -21,6 +21,7 @@ module AjaxfulRating # :nodoc:
       has_many :rates_without_dimension, :as => :rateable, :class_name => 'Rate',
         :dependent => :destroy, :conditions => {:dimension => nil}
       has_many :raters_without_dimension, :through => :rates_without_dimension, :source => :rater
+      validates_numericality_of :stars, :minimum => 1
 
       class << self
         def axr_config(dimension = nil)
@@ -78,7 +79,7 @@ module AjaxfulRating # :nodoc:
     #     # some page update here ...
     #   end
     def rate(stars, user, dimension = nil)
-      return false if (stars.to_i > self.class.max_stars)
+      return false if (stars.to_i > self.class.max_stars) || (stars.to_i < 1)
       raise Errors::AlreadyRatedError if (!self.class.axr_config(dimension)[:allow_update] && rated_by?(user, dimension))
 
       rate = if self.class.axr_config(dimension)[:allow_update] && rated_by?(user, dimension)

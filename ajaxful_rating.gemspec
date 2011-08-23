@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{ajaxful_rating}
-  s.version = "3.0.0.beta4"
+  s.version = "3.0.0.beta5"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Edgar J. Suarez", "Denis Odorcic"]
-  s.date = %q{2011-08-16}
+  s.date = %q{2011-08-23}
   s.description = %q{Provides a simple way to add rating functionality to your application.}
   s.email = ["edgar.js@gmail.com", "denis.odorcic@gmail.com"]
   s.extra_rdoc_files = [
