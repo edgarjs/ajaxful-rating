@@ -30,6 +30,7 @@ module AjaxfulRating # :nodoc:
         :wrap => true,
         :small => false,
         :show_user_rating => false,
+        :disable_remote => false,
         :force_static => false,
         :current_user => (@template.current_user if @template.respond_to?(:current_user))
       }.merge(options)
@@ -37,7 +38,7 @@ module AjaxfulRating # :nodoc:
       @options[:small] = @options[:small].to_s == 'true'
       @options[:show_user_rating] = @options[:show_user_rating].to_s == 'true'
       @options[:wrap] = @options[:wrap].to_s == 'true'
-      
+     
       @remote_options = {
         :url => nil,
         :method => :post
@@ -64,8 +65,8 @@ module AjaxfulRating # :nodoc:
       
       stars << @template.content_tag(:li, i18n(:current), :class => "show-value",
         :style => "width: #{width}%")
-      stars += (1..rateable.class.max_stars).map do |i|
-        star_tag(i)
+      stars += (1..rateable.class.max_stars/rateable.class.to_nearest).map do |i|
+        star_tag(i*rateable.class.to_nearest)
       end
       # When using rails_xss plugin, it needs to render as HTML
       stars = "".respond_to?(:html_safe) ? stars.join.html_safe : stars.join
@@ -74,10 +75,10 @@ module AjaxfulRating # :nodoc:
     
     def star_tag(value)
       already_rated = rateable.rated_by?(user, options[:dimension]) if user
-      css_class = "stars-#{value}"
+      css_class = "stars-%s" % [ value.to_s.gsub('.', '_') ]
       @css_builder.rule(".ajaxful-rating .#{css_class}", {
         :width => "#{(value / rateable.class.max_stars.to_f) * 100}%",
-        :zIndex => (rateable.class.max_stars + 2 - value).to_s
+        :zIndex => "%.f" % ( (rateable.class.max_stars/rateable.class.to_nearest) + 2 - (value/rateable.class.to_nearest))
       })
       @template.content_tag(:li) do
         if !options[:force_static] && (user && options[:current_user] == user &&
@@ -104,11 +105,16 @@ module AjaxfulRating # :nodoc:
         :url => "#{remote_options[:url]}",
         :with => "'#{query}'"
       }
-      @template.link_to_remote(value, remote_options.merge(config))
+      if options[:disable_remote]
+        config[:url] += "?" + query
+        @template.link_to(value, config[:url], config[:html])
+      else
+        @template.link_to_remote(value, remote_options.merge(config))
+      end
     end
     
     def wrapper_tag
-      @template.content_tag(:div, ratings_tag, :class => "ajaxful-rating-wrapper",
+      @template.content_tag(:div, ratings_tag, :class => "ajaxful-rating-wrapper#{' show-user-rating' if @options[:show_user_rating]}",
         :id => rateable.wrapper_dom_id(options))
     end
   end
