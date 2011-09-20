@@ -20,7 +20,7 @@ module AjaxfulRating # :nodoc:
     # * <tt>:show_user_rating</tt> Set to true if you want to display only the current user's rating, instead of the global average.
     # * <tt>:dimension</tt> The dimension to show the ratings for.
     # * <tt>:force_static</tt> Force static stars even when you're passing a user instance.
-    # * <tt>:to_nearest</tt> Force average to be to the nearest whatever. eg. 0.5 for the nearest half-star
+    # * <tt>:to_nearest</tt> Allow stars to be set and averaged to nearest whatever. eg. 0.5 for the nearest half-star
     # 
     # Example:
     #   <%= ratings_for @article, :wrap => false %> # => Will produce something like:
@@ -70,9 +70,9 @@ module AjaxfulRating # :nodoc:
     # 
     #   ajaxful_rating:
     #     helper:
-    #       global_average: "Global rating average: {{value}} out of {{max}}"
-    #       user_rating: "Your rating: {{value}} out of {{max}}"
-    #       hover: "Rate {{value}} out of {{max}}"    def ratings_for(*args)
+    #       global_average: "Global rating average: %{value} out of %{max}"
+    #       user_rating: "Your rating: %{value} out of %{max}"
+    #       hover: "Rate %{value} out of %{max}"    def ratings_for(*args)
     def ratings_for(*args)
       @axr_css ||= CSSBuilder.new
       options = args.extract_options!.symbolize_keys.slice(:small, :remote_options,
