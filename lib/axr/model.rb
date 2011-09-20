@@ -13,7 +13,7 @@ module AjaxfulRating # :nodoc:
     # * <tt>:allow_update</tt> Set to true if you want users to be able to update their votes.
     # * <tt>:cache_column</tt> Name of the column for storing the cached rating average.
     # * <tt>:cache_column</tt> Name of the column for storing the cached rating average.
-    # * <tt>:to_nearest</tt> Force average to be to the nearest whatever. eg. 0.5 for the nearest half-star. May be overridden in the ratings_for
+    # * <tt>:to_nearest</tt> Allow stars to be set and averaged to nearest whatever . eg. 0.5 for the nearest half-star. May be overridden in the ratings_for
     #
     # Example:
     #   class Article < ActiveRecord::Base
@@ -200,6 +200,11 @@ module AjaxfulRating # :nodoc:
     #   ajaxful_rateable :stars => 10
     def max_stars
       axr_config[:stars]
+    end
+
+    # Allow stars to be set and averaged to nearest whatever. eg. 0.5 for the nearest half-star
+    def to_nearest
+      axr_config[:to_nearest] || 1
     end
 
     # Name of the class for the user model.

@@ -65,8 +65,8 @@ module AjaxfulRating # :nodoc:
       
       stars << @template.content_tag(:li, i18n(:current), :class => "show-value",
         :style => "width: #{width}%")
-      stars += (1..rateable.class.max_stars).map do |i|
-        star_tag(i)
+      stars += (1..rateable.class.max_stars/rateable.class.to_nearest).map do |i|
+        star_tag(i*rateable.class.to_nearest)
       end
       # When using rails_xss plugin, it needs to render as HTML
       stars = "".respond_to?(:html_safe) ? stars.join.html_safe : stars.join
@@ -75,10 +75,10 @@ module AjaxfulRating # :nodoc:
     
     def star_tag(value)
       already_rated = rateable.rated_by?(user, options[:dimension]) if user
-      css_class = "stars-#{value}"
+      css_class = "stars-%s" % [ value.to_s.gsub('.', '_') ]
       @css_builder.rule(".ajaxful-rating .#{css_class}", {
         :width => "#{(value / rateable.class.max_stars.to_f) * 100}%",
-        :zIndex => (rateable.class.max_stars + 2 - value).to_s
+        :zIndex => "%.f" % ( (rateable.class.max_stars/rateable.class.to_nearest) + 2 - (value/rateable.class.to_nearest))
       })
       @template.content_tag(:li) do
         if !options[:force_static] && (user && options[:current_user] == user &&
