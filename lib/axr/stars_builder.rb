@@ -71,7 +71,7 @@ module AjaxfulRating # :nodoc:
     end
     
     def star_tag(value)
-      already_rated = rateable.rated_by?(user, options[:dimension]) if user
+      already_rated = rateable.rated_by?(user, options[:dimension]) if user && !rateable.axr_config(options[:dimension])[:allow_update]
       css_class = "stars-#{value}"
       @css_builder.rule(".ajaxful-rating .#{css_class}", {
         :width => "#{(value / rateable.class.max_stars.to_f) * 100}%",
@@ -79,7 +79,7 @@ module AjaxfulRating # :nodoc:
       })
 
       @template.content_tag(:li) do
-        if !options[:force_static] && (user && options[:current_user] == user && (!already_rated || rateable.axr_config(options[:dimension])[:allow_update]))
+        if !options[:force_static] && !already_rated && user && options[:current_user] == user
           link_star_tag(value, css_class)
         else
           @template.content_tag(:span, show_value, :class => css_class, :title => i18n(:current))
