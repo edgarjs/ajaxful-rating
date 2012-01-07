@@ -6,8 +6,8 @@ module AjaxfulRating # :nodoc:
     # current page.
     def ajaxful_rating_style
       @axr_css ||= CSSBuilder.new
-      stylesheet_link_tag('ajaxful_rating') +
-        content_tag(:style, @axr_css.to_css, :type => "text/css")
+      # stylesheet_link_tag('ajaxful_rating') +
+      content_tag(:style, @axr_css.to_css, :type => "text/css")
     end
     
     # Generates the stars list to submit a rate.

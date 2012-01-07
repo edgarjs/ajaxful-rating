@@ -7,7 +7,7 @@
 .ajaxful-rating a:active,
 .ajaxful-rating a:focus,
 .ajaxful-rating .show-value{
-    background: url(/images/ajaxful_rating/star.png) left -1000px repeat-x;
+    background: image-url("ajaxful_rating/star.png") left -1000px repeat-x;
 }
 .ajaxful-rating{
     position: relative;
@@ -78,7 +78,7 @@ z-index: 2;
 .ajaxful-rating.small a:active,
 .ajaxful-rating.small a:focus,
 .ajaxful-rating.small .show-value{
-    background-image: url(/images/ajaxful_rating/star_small.png);
+    background-image: image-url("ajaxful_rating/star_small.png");
     line-height: 10px;
     height: 10px;
 }
